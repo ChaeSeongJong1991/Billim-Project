@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: billim-api
+  
+  # Database Configuration
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:billim_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
+    username: ${MYSQL_USER:billim_user}
+    password: ${MYSQL_PASSWORD:billim_password}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # JPA / Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: create # 스키마 불일치 해결을 위해 create로 변경 (재시작 후 update로 복구 권장)
+    properties:
+      hibernate:
+        format_sql: true # 쿼리 가독성 향상
+        show_sql: true
+        default_batch_fetch_size: 100 # N+1 문제 완화의 기본 조치
+
+  # Redis Configuration
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+jwt:
+  secret: "v3ry-s3cr3t-k3y-f0r-b1ll1m-d3v-env1r0nm3nt-must-be-long-enough" # 개발용 임시 키
+  access-token-validity: 3600000 # 1시간
+  refresh-token-validity: 1209600000 # 14일
