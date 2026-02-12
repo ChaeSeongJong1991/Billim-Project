@@ -38,6 +38,7 @@ dependencies {
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.3")
 
     runtimeOnly("com.mysql:mysql-connector-j")
+    implementation("com.google.firebase:firebase-admin:9.4.3")
     
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

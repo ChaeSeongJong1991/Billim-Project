@@ -12,33 +12,97 @@ import { SiNaver } from "react-icons/si";
 import api from "@/lib/axios"; // 방금 만든 axios instance
 import { useAuthStore } from "@/store/useAuthStore";
 
+import { useModal } from "@/app/context/ModalContext"; // ★ Global Modal Hook
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [isLoading, setIsLoading] = useState(false);
+
   const router = useRouter();
   const login = useAuthStore((state) => state.login); // Zustand Action
+  const { showAlert } = useModal(); // ★ 훅 사용
 
-  // 1. 일반 로그인 (LOCAL Provider)
+  // 유효성 검사 함수
+  const validateInputs = () => {
+    const newErrors: { email?: string; password?: string } = {};
+    let isValid = true;
+
+    // 1. 이메일 검증
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email) {
+      newErrors.email = "이메일을 입력해주세요.";
+      isValid = false;
+    } else if (email.length > 50) {
+      newErrors.email = "이메일은 50자 이내여야 합니다.";
+      isValid = false;
+    } else if (!emailRegex.test(email)) {
+      newErrors.email = "올바른 이메일 형식이 아닙니다.";
+      isValid = false;
+    }
+
+    // 2. 비밀번호 검증
+    if (!password) {
+      newErrors.password = "비밀번호를 입력해주세요.";
+      isValid = false;
+    } else if (password.length < 8) {
+      newErrors.password = "비밀번호는 최소 8자 이상이어야 합니다.";
+      isValid = false;
+    } else if (password.length > 20) {
+      newErrors.password = "비밀번호는 20자 이내여야 합니다.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   // 1. 일반 로그인 (LOCAL Provider)
   const handleLocalLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // 보안: 입력값 트림 처리
+    const sanitizedEmail = email.trim();
+    setEmail(sanitizedEmail);
+
+    if (!validateInputs()) return;
+
+    setIsLoading(true);
+
     try {
       // 백엔드 호출
       const response = await api.post("/auth/signin", {
-        email,
+        email: sanitizedEmail,
         password,
       });
 
       const { accessToken } = response.data;
 
       // Zustand Store에 저장 (User 정보는 일단 이메일로 임시 저장)
-      login(accessToken, { email, name: "사용자" });
+      login(accessToken, { email: sanitizedEmail, name: "사용자" });
 
-      alert("로그인 성공!");
-      router.push("/dashboard"); // 대시보드로 이동
+      // ★ Native Alert 대체 -> Global Modal
+      showAlert({
+        title: "로그인 성공",
+        message: "관리자 페이지로 이동합니다.",
+        variant: "SUCCESS",
+        onConfirm: () => router.push("/admin/dashboard") // 확인 누르면 이동
+      });
+
     } catch (error: any) {
       console.error("Login Failed:", error);
-      alert("로그인 실패: 이메일이나 비밀번호를 확인하세요.");
+
+      const errorMessage = error.response?.data?.message || "이메일이나 비밀번호를 확인하세요.";
+
+      // ★ Native Alert 대체 -> Global Modal
+      showAlert({
+        title: "로그인 실패",
+        message: errorMessage,
+        variant: "DANGER"
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,9 +133,15 @@ export default function LoginPage() {
                 type="email"
                 placeholder="investor@billim.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (errors.email) setErrors({ ...errors, email: undefined });
+                }}
+                maxLength={50} // HTML 레벨 제한
+                className={errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}
                 required
               />
+              {errors.email && <p className="text-xs text-red-500 font-medium">{errors.email}</p>}
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
@@ -84,12 +154,18 @@ export default function LoginPage() {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  if (errors.password) setErrors({ ...errors, password: undefined });
+                }}
+                maxLength={20} // HTML 레벨 제한
+                className={errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}
                 required
               />
+              {errors.password && <p className="text-xs text-red-500 font-medium">{errors.password}</p>}
             </div>
-            <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800">
-              로그인
+            <Button type="submit" className="w-full bg-slate-900 hover:bg-slate-800" disabled={isLoading}>
+              {isLoading ? "로그인 중..." : "로그인"}
             </Button>
           </form>
 

@@ -39,3 +39,7 @@ out/
 ### Kotlin ###
 .kotlin
 .env
+serviceAccountKey.json
+
+### Database Data ###
+data/

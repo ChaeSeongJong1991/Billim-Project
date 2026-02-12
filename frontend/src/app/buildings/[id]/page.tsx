@@ -23,6 +23,8 @@ interface Contract {
     endDate: string;
 }
 
+import { useModal } from "@/app/context/ModalContext";
+
 export default function BuildingDetailPage() {
     const params = useParams();
     const router = useRouter();
@@ -33,6 +35,7 @@ export default function BuildingDetailPage() {
     const [contracts, setContracts] = useState<Contract[]>([]);
     const [loading, setLoading] = useState(true);
     const [isOpen, setIsOpen] = useState(false);
+    const { showAlert } = useModal(); // ★ 훅 사용
 
     // 계약 등록 폼 상태
     const [formData, setFormData] = useState({
@@ -84,7 +87,14 @@ export default function BuildingDetailPage() {
             };
 
             await api.post("/contracts", payload);
-            alert("계약이 등록되었습니다.");
+
+            // ★ Native Alert 대체
+            showAlert({
+                title: "등록 완료",
+                message: "계약이 성공적으로 등록되었습니다.",
+                variant: "SUCCESS"
+            });
+
             setIsOpen(false);
             fetchContracts(); // 목록 갱신
 
@@ -101,7 +111,12 @@ export default function BuildingDetailPage() {
             });
         } catch (error) {
             console.error("등록 실패:", error);
-            alert("등록 실패: 입력 값을 확인해주세요.");
+            // ★ Native Alert 대체
+            showAlert({
+                title: "등록 실패",
+                message: "입력 값을 다시 확인해주세요.",
+                variant: "DANGER"
+            });
         }
     };
 

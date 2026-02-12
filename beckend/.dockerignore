@@ -1,0 +1,9 @@
+# .dockerignore
+.git
+.gradle
+.idea
+.vscode
+out
+data
+help.md
+docker-compose.yml

@@ -22,6 +22,10 @@ class Room(
     @Column(nullable = false)
     var floor: Int,
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    var status: RoomStatus = RoomStatus.VACANT,
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null
@@ -29,4 +33,8 @@ class Room(
 
 enum class PropertyType {
     ONE_ROOM, APT
+}
+
+enum class RoomStatus {
+    VACANT, OCCUPIED, MAINTENANCE
 }
