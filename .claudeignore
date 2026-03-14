@@ -1,0 +1,86 @@
+# Dependencies
+node_modules/
+.gradle/
+build/
+dist/
+out/
+
+# Environment & Secrets (CRITICAL - never commit these)
+.env
+.env.local
+.env.*.local
+serviceAccountKey.json
+application-*.properties
+
+# Build outputs
+beckend/build/
+beckend/.gradle/
+frontend/.next/
+frontend/out/
+
+# IDE & Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.iml
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Docker volumes
+beckend/data/
+
+# Git
+.git/
+.gitignore
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Package manager locks (optional - comment out if you want to track)
+# package-lock.json
+# gradle.properties
+
+# IDE config (local user settings)
+.vscode/settings.json
+.vscode/launch.json
+
+# Compiled Java classes
+*.class
+*.jar
+*.war
+
+# Node.js
+.pnpm-debug.log*
+lerna-debug.log*
+
+# Yarn
+.yarn/cache/
+.yarn/unplugged/
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Gradle wrapper (optional)
+# gradlew
+# gradlew.bat
+# gradle/
