@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: billim-api
+
+  # H2 In-Memory Database for Testing
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  # JPA / Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: false
+        default_batch_fetch_size: 100
+    database-platform: org.hibernate.dialect.H2Dialect
+
+  # Redis Configuration (disabled for tests)
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  # Spring Batch
+  batch:
+    job:
+      enabled: false
+
+jwt:
+  secret: "v3ry-s3cr3t-k3y-f0r-b1ll1m-d3v-env1r0nm3nt-must-be-long-enough"
+  access-token-validity: 3600000
+  refresh-token-validity: 1209600000

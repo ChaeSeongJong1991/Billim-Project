@@ -40,8 +40,6 @@ const maintenanceData = [
 ];
 
 export default function MaintenancePage() {
-
-    const [activeTab, setActiveTab] = useState('ALL'); // ALL, DOING, DONE
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // 우선순위 배지
@@ -86,12 +84,8 @@ export default function MaintenancePage() {
                 {['ALL', 'DOING', 'DONE'].map((tab) => (
                     <button
                         key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`px-4 py-3 font-bold text-sm transition border-b-2 whitespace-nowrap \${
-              activeTab === tab 
-                ? 'border-blue-600 text-blue-600' 
-                : 'border-transparent text-slate-400 hover:text-slate-600'
-            }`}
+                        onClick={() => { /* Tab selection would be implemented here */ }}
+                        className={`px-4 py-3 font-bold text-sm transition border-b-2 whitespace-nowrap border-transparent text-slate-400 hover:text-slate-600`}
                     >
                         {tab === 'ALL' && '전체 보기'}
                         {tab === 'DOING' && '처리 중 (2)'}

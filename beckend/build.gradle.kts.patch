@@ -1,0 +1,25 @@
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -59,15 +59,22 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+ // JaCoCo Code Coverage Configuration
+ jacoco {
+     toolVersion = "0.8.10"
+ }
+ 
++tasks.test {
++    useJUnitPlatform()
++    jvmArgs = listOf("-javaagent:\${classpath.find { it.name.contains('jacocoagent') }}")
++}
++
+ tasks.withType<Test> {
+     finalizedBy(tasks.jacocoTestReport)
+ }
+ 
+ tasks.jacocoTestReport {
+     dependsOn(tasks.test)
++    
+     reports {
+         xml.required = true
+         html.required = true
+         csv.required = false
+     }

@@ -97,7 +97,12 @@ function AddRoomModal({ buildingId, onClose }: { buildingId: number; onClose: ()
         }
         createRoom({ roomNumber, floor, propertyType, managementNumber: managementNumber || undefined }, {
             onSuccess: () => { showAlert({ title: '등록 완료', message: '호실이 등록되었습니다.', variant: 'SUCCESS' }); onClose(); },
-            onError: (err: any) => showAlert({ title: '오류', message: err.response?.data?.message || '호실 등록에 실패했습니다.', variant: 'DANGER' }),
+            onError: (err: unknown) => {
+                const errorMessage = err && typeof err === 'object' && 'response' in err
+                    ? (err.response as { data?: { message?: string } })?.data?.message
+                    : '호실 등록에 실패했습니다.';
+                showAlert({ title: '오류', message: errorMessage || '호실 등록에 실패했습니다.', variant: 'DANGER' });
+            },
         });
     };
 

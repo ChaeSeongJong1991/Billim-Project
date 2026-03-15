@@ -6,6 +6,8 @@ import com.billim.domain.tenant.api.dto.TenantUpdateRequest
 import com.billim.domain.tenant.domain.Tenant
 import com.billim.domain.tenant.infra.TenantRepository
 import com.billim.domain.user.infra.UserRepository
+import com.billim.global.exception.EntityNotFoundException
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -15,9 +17,11 @@ class TenantService(
     private val tenantRepository: TenantRepository,
     private val userRepository: UserRepository
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     fun create(email: String, request: TenantCreateRequest): Long {
+        logger.info("Creating tenant for email: {}, phone: {}", email, request.phoneNumber)
         val landlord = userRepository.findByEmail(email)
             ?: throw IllegalArgumentException("사용자를 찾을 수 없습니다.")
 
@@ -65,7 +69,7 @@ class TenantService(
 
     private fun getVerifiedTenant(email: String, tenantId: Long): Tenant {
         val tenant = tenantRepository.findById(tenantId)
-            .orElseThrow { IllegalArgumentException("세입자를 찾을 수 없습니다.") }
+            .orElseThrow { EntityNotFoundException(tenantId, "세입자를 찾을 수 없습니다.") }
 
         if (tenant.landlord.email != email) {
             throw IllegalStateException("본인이 등록한 세입자만 조회/수정/삭제할 수 있습니다.")

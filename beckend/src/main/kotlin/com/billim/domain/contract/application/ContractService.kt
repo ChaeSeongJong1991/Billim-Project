@@ -6,6 +6,8 @@ import com.billim.domain.contract.api.dto.ContractResponse
 import com.billim.domain.contract.domain.Contract
 import com.billim.domain.contract.infra.ContractRepository
 import com.billim.domain.user.infra.UserRepository
+import com.billim.global.exception.EntityNotFoundException
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,16 +18,18 @@ class ContractService(
     private val buildingRepository: BuildingRepository,
     private val userRepository: UserRepository
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     fun create(email: String, request: ContractCreateRequest): Long {
+        logger.info("Creating contract for building: {}, room: {}", request.buildingId, request.roomNumber)
         // 1. 사용자 조회
         val user = userRepository.findByEmail(email)
             ?: throw IllegalArgumentException("사용자를 찾을 수 없습니다.")
 
         // 2. 건물 조회
         val building = buildingRepository.findById(request.buildingId)
-            .orElseThrow { IllegalArgumentException("건물을 찾을 수 없습니다.") }
+            .orElseThrow { EntityNotFoundException(request.buildingId, "건물을 찾을 수 없습니다.") }
 
         // 3. [보안 핵심] 본인 소유의 건물이 맞는지 검증
         if (building.user.id != user.id) {
@@ -52,7 +56,7 @@ class ContractService(
     fun getContractsByBuilding(email: String, buildingId: Long): List<ContractResponse> {
         val user = userRepository.findByEmail(email)!!
         val building = buildingRepository.findById(buildingId)
-            .orElseThrow { IllegalArgumentException("건물을 찾을 수 없습니다.") }
+            .orElseThrow { EntityNotFoundException(buildingId, "건물을 찾을 수 없습니다.") }
 
         // 소유주 확인
         if (building.user.id != user.id) {

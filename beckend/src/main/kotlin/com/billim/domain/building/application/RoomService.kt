@@ -7,6 +7,8 @@ import com.billim.domain.building.api.dto.RoomUpdateRequest
 import com.billim.domain.building.domain.Room
 import com.billim.domain.building.infra.BuildingRepository
 import com.billim.domain.building.infra.RoomRepository
+import com.billim.global.exception.EntityNotFoundException
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,11 +18,13 @@ class RoomService(
     private val roomRepository: RoomRepository,
     private val buildingRepository: BuildingRepository
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     fun create(email: String, buildingId: Long, request: RoomCreateRequest): Long {
+        logger.info("Creating room: {} in building: {}", request.roomNumber, buildingId)
         val building = buildingRepository.findById(buildingId)
-            .orElseThrow { IllegalArgumentException("건물을 찾을 수 없습니다.") }
+            .orElseThrow { EntityNotFoundException(buildingId, "건물을 찾을 수 없습니다.") }
 
         if (building.user.email != email) {
             throw IllegalStateException("본인의 건물에만 호실을 추가할 수 있습니다.")
@@ -43,7 +47,7 @@ class RoomService(
 
     fun getRoomsByBuilding(email: String, buildingId: Long): List<RoomResponse> {
         val building = buildingRepository.findById(buildingId)
-            .orElseThrow { IllegalArgumentException("건물을 찾을 수 없습니다.") }
+            .orElseThrow { EntityNotFoundException(buildingId, "건물을 찾을 수 없습니다.") }
 
         if (building.user.email != email) {
             throw IllegalStateException("본인의 건물만 조회할 수 있습니다.")
@@ -79,14 +83,14 @@ class RoomService(
 
     private fun getVerifiedRoom(email: String, buildingId: Long, roomId: Long): Room {
         val building = buildingRepository.findById(buildingId)
-            .orElseThrow { IllegalArgumentException("건물을 찾을 수 없습니다.") }
+            .orElseThrow { EntityNotFoundException(buildingId, "건물을 찾을 수 없습니다.") }
 
         if (building.user.email != email) {
             throw IllegalStateException("본인의 건물만 수정할 수 있습니다.")
         }
 
         val room = roomRepository.findById(roomId)
-            .orElseThrow { IllegalArgumentException("호실을 찾을 수 없습니다.") }
+            .orElseThrow { EntityNotFoundException(roomId, "호실을 찾을 수 없습니다.") }
 
         if (room.building.id != buildingId) {
             throw IllegalStateException("해당 건물의 호실이 아닙니다.")
