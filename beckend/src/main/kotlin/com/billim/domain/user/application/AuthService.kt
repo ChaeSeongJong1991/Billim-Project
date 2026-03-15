@@ -15,6 +15,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.RestTemplate
 
 @Service
@@ -69,10 +70,15 @@ class AuthService(
 
         // Fallback: Google tokeninfo API (serviceAccountKey.json 없는 환경)
         logger.warn("Firebase Admin 미초기화 — Google tokeninfo API로 fallback 검증")
-        val response = restTemplate.getForObject(
-            "https://oauth2.googleapis.com/tokeninfo?id_token=$idToken",
-            Map::class.java
-        ) ?: throw IllegalArgumentException("Google 토큰 검증에 실패했습니다.")
+        val response = try {
+            restTemplate.getForObject(
+                "https://oauth2.googleapis.com/tokeninfo?id_token=$idToken",
+                Map::class.java
+            ) ?: throw IllegalArgumentException("Google 토큰 검증에 실패했습니다.")
+        } catch (e: HttpClientErrorException) {
+            logger.error("Google tokeninfo API 오류: {} {}", e.statusCode, e.responseBodyAsString)
+            throw IllegalArgumentException("Google 토큰이 유효하지 않습니다. (${e.statusCode})")
+        }
 
         val email = response["email"] as? String
             ?: throw IllegalArgumentException("Google 계정에 이메일이 없습니다.")

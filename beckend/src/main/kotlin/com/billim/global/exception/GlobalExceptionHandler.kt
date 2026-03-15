@@ -104,6 +104,27 @@ class GlobalExceptionHandler {
     }
 
     /**
+     * 서버 설정 오류 (환경변수 누락 등)
+     */
+    @ExceptionHandler(IllegalStateException::class)
+    fun handleIllegalStateException(
+        e: IllegalStateException,
+        request: WebRequest
+    ): ResponseEntity<ApiResponse<Map<String, Any>>> {
+        logger.error("Server configuration error: {}", e.message)
+
+        val errorData = mapOf(
+            "message" to (e.message ?: "서버 설정 오류"),
+            "path" to request.getDescription(false).replace("uri=", "")
+        )
+
+        return ResponseEntity(
+            ApiResponse.error(e.message ?: "서버 설정 오류가 발생했습니다", errorData),
+            HttpStatus.INTERNAL_SERVER_ERROR
+        )
+    }
+
+    /**
      * 예상치 못한 일반 예외 처리
      */
     @ExceptionHandler(Exception::class)
