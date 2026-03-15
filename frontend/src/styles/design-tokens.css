@@ -1,0 +1,263 @@
+/* Design Tokens - CSS Variables
+ * All design tokens defined as CSS custom properties
+ * Supports light and dark mode via @media prefers-color-scheme
+ */
+
+:root {
+  /* ===== COLORS - PRIMARY ===== */
+  --color-primary-50: #f8f7ff;
+  --color-primary-100: #ede9ff;
+  --color-primary-200: #ddd3ff;
+  --color-primary-300: #c4a9ff;
+  --color-primary-400: #a470ff;
+  --color-primary-500: #8838ff;
+  --color-primary-600: #7a1bef;
+  --color-primary-700: #6c0dd4;
+  --color-primary-800: #5a0ab8;
+  --color-primary-900: #4a089a;
+
+  /* ===== COLORS - SECONDARY ===== */
+  --color-secondary-50: #f5f3ff;
+  --color-secondary-100: #ede8ff;
+  --color-secondary-200: #ddd3ff;
+  --color-secondary-300: #c4a9ff;
+  --color-secondary-400: #a470ff;
+  --color-secondary-500: #7c3aed;
+  --color-secondary-600: #6d28d9;
+  --color-secondary-700: #5b21b6;
+  --color-secondary-800: #4c1d95;
+  --color-secondary-900: #2e1065;
+
+  /* ===== COLORS - STATUS ===== */
+  --color-status-success: #10b981;
+  --color-status-warning: #f59e0b;
+  --color-status-error: #ef4444;
+  --color-status-info: #3b82f6;
+
+  /* ===== COLORS - PRIORITY ===== */
+  --color-priority-high: #dc2626;
+  --color-priority-medium: #f59e0b;
+  --color-priority-low: #10b981;
+
+  /* ===== COLORS - NEUTRAL ===== */
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f3f4f6;
+  --color-neutral-200: #e5e7eb;
+  --color-neutral-300: #d1d5db;
+  --color-neutral-400: #9ca3af;
+  --color-neutral-500: #6b7280;
+  --color-neutral-600: #4b5563;
+  --color-neutral-700: #374151;
+  --color-neutral-800: #1f2937;
+  --color-neutral-900: #111827;
+
+  /* ===== SEMANTIC COLORS ===== */
+  --color-text-primary: var(--color-neutral-900);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-tertiary: var(--color-neutral-500);
+  --color-text-disabled: var(--color-neutral-400);
+
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: var(--color-neutral-50);
+  --color-bg-tertiary: var(--color-neutral-100);
+
+  --color-border-light: var(--color-neutral-200);
+  --color-border-base: var(--color-neutral-300);
+  --color-border-dark: var(--color-neutral-400);
+
+  /* ===== TYPOGRAPHY - FONT FAMILIES ===== */
+  --font-family-display: "Cinzel", serif;
+  --font-family-body: "Josefin Sans", sans-serif;
+  --font-family-mono: "Courier New", monospace;
+
+  /* ===== TYPOGRAPHY - FONT SIZES ===== */
+  --font-size-xs: 0.75rem;        /* 12px */
+  --font-size-sm: 0.875rem;       /* 14px */
+  --font-size-base: 1rem;         /* 16px */
+  --font-size-lg: 1.125rem;       /* 18px */
+  --font-size-xl: 1.25rem;        /* 20px */
+  --font-size-2xl: 1.5rem;        /* 24px */
+  --font-size-3xl: 1.875rem;      /* 30px */
+  --font-size-4xl: 2.25rem;       /* 36px */
+  --font-size-5xl: 3rem;          /* 48px */
+
+  /* ===== TYPOGRAPHY - FONT WEIGHTS ===== */
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ===== TYPOGRAPHY - LINE HEIGHTS ===== */
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.75;
+
+  /* ===== SPACING - 8dp GRID SYSTEM ===== */
+  --spacing-0: 0;
+  --spacing-1: 0.5rem;      /* 4px */
+  --spacing-2: 1rem;        /* 8px */
+  --spacing-3: 1.5rem;      /* 12px */
+  --spacing-4: 2rem;        /* 16px */
+  --spacing-6: 3rem;        /* 24px */
+  --spacing-8: 4rem;        /* 32px */
+  --spacing-12: 6rem;       /* 48px */
+  --spacing-16: 8rem;       /* 64px */
+
+  /* ===== BORDER RADIUS ===== */
+  --radius-none: 0;
+  --radius-sm: 0.25rem;     /* 2px */
+  --radius-base: 0.375rem;  /* 4px */
+  --radius-md: 0.5rem;      /* 8px */
+  --radius-lg: 0.75rem;     /* 12px */
+  --radius-xl: 1rem;        /* 16px */
+  --radius-2xl: 1.5rem;     /* 24px */
+  --radius-full: 9999px;
+
+  /* ===== SHADOWS ===== */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-base: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+  --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.15);
+
+  /* ===== TRANSITIONS ===== */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ===== Z-INDEX ===== */
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;
+  --z-modal-backdrop: 1300;
+  --z-modal: 1400;
+  --z-tooltip: 1500;
+}
+
+/* ===== DARK MODE OVERRIDES ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Neutral colors inverted for dark mode */
+    --color-neutral-50: #111827;
+    --color-neutral-100: #1f2937;
+    --color-neutral-200: #374151;
+    --color-neutral-300: #4b5563;
+    --color-neutral-400: #9ca3af;
+    --color-neutral-500: #d1d5db;
+    --color-neutral-600: #e5e7eb;
+    --color-neutral-700: #f3f4f6;
+    --color-neutral-800: #f9fafb;
+    --color-neutral-900: #ffffff;
+
+    /* Semantic dark mode colors */
+    --color-text-primary: var(--color-neutral-900);
+    --color-text-secondary: var(--color-neutral-600);
+    --color-text-tertiary: var(--color-neutral-500);
+
+    --color-bg-primary: #0f172a;
+    --color-bg-secondary: var(--color-neutral-50);
+    --color-bg-tertiary: var(--color-neutral-100);
+
+    --color-border-light: var(--color-neutral-200);
+    --color-border-base: var(--color-neutral-300);
+    --color-border-dark: var(--color-neutral-400);
+
+    /* Adjust shadows for dark mode */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-base: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6);
+    --shadow-2xl: 0 25px 50px rgba(0, 0, 0, 0.7);
+  }
+}
+
+/* ===== UTILITY CLASSES - COLORS ===== */
+
+/* Text colors */
+.text-primary { color: var(--color-primary-500); }
+.text-primary-600 { color: var(--color-primary-600); }
+.text-secondary { color: var(--color-secondary-500); }
+.text-success { color: var(--color-status-success); }
+.text-warning { color: var(--color-status-warning); }
+.text-error { color: var(--color-status-error); }
+.text-info { color: var(--color-status-info); }
+
+/* Background colors */
+.bg-primary { background-color: var(--color-primary-500); }
+.bg-primary-50 { background-color: var(--color-primary-50); }
+.bg-primary-100 { background-color: var(--color-primary-100); }
+.bg-secondary { background-color: var(--color-secondary-500); }
+.bg-success { background-color: var(--color-status-success); }
+.bg-warning { background-color: var(--color-status-warning); }
+.bg-error { background-color: var(--color-status-error); }
+.bg-info { background-color: var(--color-status-info); }
+
+/* Border colors */
+.border-primary { border-color: var(--color-primary-500); }
+.border-secondary { border-color: var(--color-secondary-500); }
+.border-success { border-color: var(--color-status-success); }
+.border-warning { border-color: var(--color-status-warning); }
+.border-error { border-color: var(--color-status-error); }
+.border-info { border-color: var(--color-status-info); }
+
+/* ===== UTILITY CLASSES - TYPOGRAPHY ===== */
+
+.font-display { font-family: var(--font-family-display); }
+.font-body { font-family: var(--font-family-body); }
+.font-mono { font-family: var(--font-family-mono); }
+
+.text-xs { font-size: var(--font-size-xs); }
+.text-sm { font-size: var(--font-size-sm); }
+.text-base { font-size: var(--font-size-base); }
+.text-lg { font-size: var(--font-size-lg); }
+.text-xl { font-size: var(--font-size-xl); }
+.text-2xl { font-size: var(--font-size-2xl); }
+.text-3xl { font-size: var(--font-size-3xl); }
+.text-4xl { font-size: var(--font-size-4xl); }
+.text-5xl { font-size: var(--font-size-5xl); }
+
+.font-light { font-weight: var(--font-weight-light); }
+.font-normal { font-weight: var(--font-weight-normal); }
+.font-semibold { font-weight: var(--font-weight-semibold); }
+.font-bold { font-weight: var(--font-weight-bold); }
+
+.leading-tight { line-height: var(--line-height-tight); }
+.leading-normal { line-height: var(--line-height-normal); }
+.leading-relaxed { line-height: var(--line-height-relaxed); }
+
+/* ===== UTILITY CLASSES - SHADOWS ===== */
+
+.shadow-sm { box-shadow: var(--shadow-sm); }
+.shadow-base { box-shadow: var(--shadow-base); }
+.shadow-md { box-shadow: var(--shadow-md); }
+.shadow-lg { box-shadow: var(--shadow-lg); }
+.shadow-xl { box-shadow: var(--shadow-xl); }
+.shadow-2xl { box-shadow: var(--shadow-2xl); }
+
+/* ===== UTILITY CLASSES - RADIUS ===== */
+
+.rounded-none { border-radius: var(--radius-none); }
+.rounded-sm { border-radius: var(--radius-sm); }
+.rounded { border-radius: var(--radius-base); }
+.rounded-md { border-radius: var(--radius-md); }
+.rounded-lg { border-radius: var(--radius-lg); }
+.rounded-xl { border-radius: var(--radius-xl); }
+.rounded-2xl { border-radius: var(--radius-2xl); }
+.rounded-full { border-radius: var(--radius-full); }
+
+/* ===== UTILITY CLASSES - TRANSITIONS ===== */
+
+.transition-fast { transition: all var(--transition-fast); }
+.transition-base { transition: all var(--transition-base); }
+.transition-slow { transition: all var(--transition-slow); }
+
+/* ===== UTILITY CLASSES - Z-INDEX ===== */
+
+.z-dropdown { z-index: var(--z-dropdown); }
+.z-sticky { z-index: var(--z-sticky); }
+.z-fixed { z-index: var(--z-fixed); }
+.z-modal-backdrop { z-index: var(--z-modal-backdrop); }
+.z-modal { z-index: var(--z-modal); }
+.z-tooltip { z-index: var(--z-tooltip); }

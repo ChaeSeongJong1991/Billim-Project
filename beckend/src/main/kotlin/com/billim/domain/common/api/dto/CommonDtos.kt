@@ -17,7 +17,23 @@ data class ApiResponse<T>(
 
     @JsonProperty("timestamp")
     val timestamp: LocalDateTime = LocalDateTime.now()
-)
+) {
+    companion object {
+        /**
+         * 성공 응답 생성
+         */
+        fun <T> success(data: T, message: String = "성공"): ApiResponse<T> {
+            return ApiResponse(success = true, data = data, message = message)
+        }
+
+        /**
+         * 실패 응답 생성
+         */
+        fun <T> error(message: String, data: T? = null): ApiResponse<T> {
+            return ApiResponse(success = false, data = data, message = message)
+        }
+    }
+}
 
 /**
  * 임차인 대시보드 응답
@@ -141,13 +157,7 @@ data class ImageUploadResponse(
 
     @JsonProperty("uploaded_at")
     val uploadedAt: LocalDateTime = LocalDateTime.now()
-) {
-    fun copy(
-        id: Long = this.id,
-        imageUrl: String = this.imageUrl,
-        uploadedAt: LocalDateTime = this.uploadedAt
-    ) = ImageUploadResponse(id, imageUrl, uploadedAt)
-}
+)
 
 /**
  * 이미지 삭제 요청

@@ -41,18 +41,7 @@ data class CreateWorkOrderRequest(
 
     @JsonProperty("images")
     val images: List<Long> = emptyList()
-) {
-    fun copy(
-        tenantId: Long = this.tenantId,
-        buildingId: Long = this.buildingId,
-        unitId: Long = this.unitId,
-        title: String = this.title,
-        description: String? = this.description,
-        category: WorkOrderCategory = this.category,
-        priority: Priority = this.priority,
-        images: List<Long> = this.images
-    ) = CreateWorkOrderRequest(tenantId, buildingId, unitId, title, description, category, priority, images)
-}
+)
 
 /**
  * WorkOrder 업데이트 요청
@@ -68,14 +57,7 @@ data class UpdateWorkOrderRequest(
 
     @field:NotNull(message = "우선순위는 필수입니다.")
     val priority: Priority
-) {
-    fun copy(
-        title: String = this.title,
-        description: String? = this.description,
-        category: WorkOrderCategory = this.category,
-        priority: Priority = this.priority
-    ) = UpdateWorkOrderRequest(title, description, category, priority)
-}
+)
 
 /**
  * WorkOrder 상태 업데이트 요청
@@ -86,12 +68,7 @@ data class UpdateWorkOrderStatusRequest(
 
     @JsonProperty("description")
     val description: String? = null
-) {
-    fun copy(
-        status: WorkOrderStatus = this.status,
-        description: String? = this.description
-    ) = UpdateWorkOrderStatusRequest(status, description)
-}
+)
 
 /**
  * WorkOrder 기본 정보 응답 DTO
@@ -137,23 +114,7 @@ data class WorkOrderResponse(
 
     @JsonProperty("updated_at")
     val updatedAt: LocalDateTime = LocalDateTime.now()
-) {
-    fun copy(
-        id: Long = this.id,
-        tenantId: Long = this.tenantId,
-        buildingId: Long = this.buildingId,
-        unitId: Long = this.unitId,
-        title: String = this.title,
-        description: String? = this.description,
-        category: WorkOrderCategory = this.category,
-        priority: Priority = this.priority,
-        status: WorkOrderStatus = this.status,
-        assignedVendorId: Long? = this.assignedVendorId,
-        imageCount: Int = this.imageCount,
-        createdAt: LocalDateTime = this.createdAt,
-        updatedAt: LocalDateTime = this.updatedAt
-    ) = WorkOrderResponse(id, tenantId, buildingId, unitId, title, description, category, priority, status, assignedVendorId, imageCount, createdAt, updatedAt)
-}
+)
 
 /**
  * WorkOrder 상세 조회 응답 DTO
@@ -202,24 +163,7 @@ data class WorkOrderDetailResponse(
 
     @JsonProperty("updated_at")
     val updatedAt: LocalDateTime = LocalDateTime.now()
-) {
-    fun copy(
-        id: Long = this.id,
-        tenantId: Long = this.tenantId,
-        buildingId: Long = this.buildingId,
-        unitId: Long = this.unitId,
-        title: String = this.title,
-        description: String? = this.description,
-        category: WorkOrderCategory = this.category,
-        priority: Priority = this.priority,
-        status: WorkOrderStatus = this.status,
-        assignedVendorId: Long? = this.assignedVendorId,
-        images: List<WorkOrderImageResponse> = this.images,
-        timeline: List<WorkOrderTimelineResponse> = this.timeline,
-        createdAt: LocalDateTime = this.createdAt,
-        updatedAt: LocalDateTime = this.updatedAt
-    ) = WorkOrderDetailResponse(id, tenantId, buildingId, unitId, title, description, category, priority, status, assignedVendorId, images, timeline, createdAt, updatedAt)
-}
+)
 
 /**
  * WorkOrder 목록 응답 DTO
@@ -240,14 +184,7 @@ data class WorkOrderListResponse(
     @field:NotNull(message = "페이지 크기는 필수입니다.")
     @JsonProperty("page_size")
     val pageSize: Int = 10
-) {
-    fun copy(
-        workOrders: List<WorkOrderResponse> = this.workOrders,
-        totalCount: Int = this.totalCount,
-        pageNumber: Int = this.pageNumber,
-        pageSize: Int = this.pageSize
-    ) = WorkOrderListResponse(workOrders, totalCount, pageNumber, pageSize)
-}
+)
 
 /**
  * WorkOrder 필터 요청 DTO
@@ -281,19 +218,7 @@ data class WorkOrderFilterRequest(
     @field:NotNull(message = "페이지 크기는 필수입니다.")
     @JsonProperty("page_size")
     val pageSize: Int = 10
-) {
-    fun copy(
-        status: WorkOrderStatus? = this.status,
-        priority: Priority? = this.priority,
-        category: WorkOrderCategory? = this.category,
-        tenantId: Long? = this.tenantId,
-        buildingId: Long? = this.buildingId,
-        dateRangeStart: LocalDateTime? = this.dateRangeStart,
-        dateRangeEnd: LocalDateTime? = this.dateRangeEnd,
-        pageNumber: Int = this.pageNumber,
-        pageSize: Int = this.pageSize
-    ) = WorkOrderFilterRequest(status, priority, category, tenantId, buildingId, dateRangeStart, dateRangeEnd, pageNumber, pageSize)
-}
+)
 
 /**
  * WorkOrder 타임라인 응답 DTO
@@ -312,15 +237,7 @@ data class WorkOrderTimelineResponse(
 
     @JsonProperty("changed_at")
     val changedAt: LocalDateTime = LocalDateTime.now()
-) {
-    fun copy(
-        id: Long = this.id,
-        status: WorkOrderStatus = this.status,
-        description: String? = this.description,
-        changedBy: String = this.changedBy,
-        changedAt: LocalDateTime = this.changedAt
-    ) = WorkOrderTimelineResponse(id, status, description, changedBy, changedAt)
-}
+)
 
 /**
  * WorkOrder 이미지 응답 DTO
@@ -335,13 +252,7 @@ data class WorkOrderImageResponse(
 
     @JsonProperty("uploaded_at")
     val uploadedAt: LocalDateTime = LocalDateTime.now()
-) {
-    fun copy(
-        id: Long = this.id,
-        imageUrl: String = this.imageUrl,
-        uploadedAt: LocalDateTime = this.uploadedAt
-    ) = WorkOrderImageResponse(id, imageUrl, uploadedAt)
-}
+)
 
 /**
  * WorkOrder 협력업체 할당 요청 DTO
@@ -351,9 +262,7 @@ data class AssignVendorRequest(
     @field:Min(value = 1, message = "협력업체 ID는 양수여야 합니다.")
     @JsonProperty("vendor_id")
     val vendorId: Long
-) {
-    fun copy(vendorId: Long = this.vendorId) = AssignVendorRequest(vendorId)
-}
+)
 
 /**
  * WorkOrder 협력업체 할당 해제 응답 DTO

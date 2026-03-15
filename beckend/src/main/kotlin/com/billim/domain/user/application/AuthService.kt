@@ -6,6 +6,7 @@ import com.billim.domain.user.api.dto.TokenResponse
 import com.billim.domain.user.domain.User
 import com.billim.domain.user.infra.UserRepository
 import com.billim.global.security.jwt.JwtTokenProvider
+import org.slf4j.LoggerFactory
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -20,12 +21,14 @@ class AuthService(
     private val jwtTokenProvider: JwtTokenProvider,
     private val authenticationManagerBuilder: AuthenticationManagerBuilder
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     /**
      * 회원가입
      */
     @Transactional // 쓰기 작업이므로 readOnly = false
     fun signUp(request: SignUpRequest): Long {
+        logger.info("Signing up user with email: {}", request.email)
         // 1. 이메일 중복 검사
         if (userRepository.existsByEmail(request.email)) {
             throw IllegalArgumentException("이미 가입된 이메일입니다.") // 추후 Custom Exception으로 교체 권장

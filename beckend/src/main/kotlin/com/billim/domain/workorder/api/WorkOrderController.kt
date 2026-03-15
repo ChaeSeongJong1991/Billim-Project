@@ -1,6 +1,9 @@
 package com.billim.domain.workorder.api
 
 import com.billim.domain.workorder.api.dto.*
+import com.billim.domain.workorder.domain.Priority
+import com.billim.domain.workorder.domain.WorkOrderCategory
+import com.billim.domain.workorder.domain.WorkOrderStatus
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -39,7 +42,7 @@ class WorkOrderController {
         val response = WorkOrderListResponse(
             workOrders = emptyList(),
             totalCount = 0,
-            page = filter?.page ?: 0,
+            pageNumber = filter?.pageNumber ?: 1,
             pageSize = filter?.pageSize ?: 10
         )
         return ResponseEntity.ok(response)
@@ -59,10 +62,11 @@ class WorkOrderController {
             id = id,
             title = "민원 제목",
             description = "민원 설명",
-            status = "RECEIVED",
-            priority = "HIGH",
-            category = "PLUMBING",
+            status = WorkOrderStatus.RECEIVED,
+            priority = Priority.HIGH,
+            category = WorkOrderCategory.PLUMBING,
             tenantId = 1L,
+            buildingId = 1L,
             unitId = 1L
         )
         return ResponseEntity.ok(response)

@@ -77,10 +77,10 @@ export default function LoginPage() {
         password,
       });
 
-      const { accessToken } = response.data;
-
-      // Zustand Store에 저장 (User 정보는 일단 이메일로 임시 저장)
-      login(accessToken, { email: sanitizedEmail, name: "사용자" });
+      // HttpOnly 쿠키 방식으로 마이그레이션됨
+      // 토큰은 백엔드에서 Set-Cookie로 자동 전송됨
+      // 사용자 정보만 store에 저장
+      login({ email: sanitizedEmail, name: "사용자", id: undefined });
 
       // ★ Native Alert 대체 -> Global Modal
       showAlert({
@@ -90,10 +90,12 @@ export default function LoginPage() {
         onConfirm: () => router.push("/admin/dashboard") // 확인 누르면 이동
       });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Login Failed:", error);
 
-      const errorMessage = error.response?.data?.message || "이메일이나 비밀번호를 확인하세요.";
+      const errorMessage = (error && typeof error === 'object' && 'response' in error)
+        ? (error.response as { data?: { message?: string } })?.data?.message || "이메일이나 비밀번호를 확인하세요."
+        : "이메일이나 비밀번호를 확인하세요.";
 
       // ★ Native Alert 대체 -> Global Modal
       showAlert({

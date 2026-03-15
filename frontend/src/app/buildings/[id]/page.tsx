@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import { useAuthStore } from "@/store/useAuthStore";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -58,6 +58,7 @@ export default function BuildingDetailPage() {
         if (!isNaN(buildingId)) {
             fetchContracts();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [buildingId, isAuthenticated]);
 
     const fetchContracts = async () => {

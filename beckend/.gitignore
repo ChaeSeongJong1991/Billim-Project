@@ -38,7 +38,14 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### Environment & Secrets ###
 .env
+.env.local
+.env.*.local
+.env.production.local
+application-local.yml
+application-prod.yml
 serviceAccountKey.json
 
 ### Database Data ###
