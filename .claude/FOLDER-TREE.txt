@@ -1,0 +1,332 @@
+Billim Frontend 폴더 구조 트리
+=====================================
+
+frontend/src/
+│
+├── app/                                    [Next.js App Router]
+│   ├── layout.tsx                          [루트 레이아웃]
+│   ├── page.tsx                            [랜딩 페이지]
+│   ├── login/
+│   │   └── page.tsx
+│   │
+│   ├── tenant/                             [임차인 영역]
+│   │   ├── layout.tsx
+│   │   ├── dashboard/
+│   │   │   └── page.tsx                    [대시보드]
+│   │   │
+│   │   └── work-orders/                    [민원]
+│   │       ├── page.tsx                    [목록]
+│   │       ├── create/
+│   │       │   ├── page.tsx
+│   │       │   └── components/
+│   │       │       ├── WorkOrderForm.tsx
+│   │       │       ├── ImageUploadSection.tsx
+│   │       │       └── FormActions.tsx
+│   │       │
+│   │       └── [id]/                       [상세]
+│   │           ├── page.tsx
+│   │           └── components/
+│   │               ├── ProgressBar.tsx
+│   │               ├── BasicInfoCard.tsx
+│   │               ├── DescriptionCard.tsx
+│   │               ├── ImageGallery.tsx
+│   │               ├── ContractorCard.tsx
+│   │               ├── TimelineLog.tsx
+│   │               └── ActionButtons.tsx
+│   │
+│   ├── admin/                              [관리자 영역]
+│   │   ├── layout.tsx
+│   │   ├── dashboard/                      [대시보드]
+│   │   │   ├── page.tsx
+│   │   │   └── components/
+│   │   │       ├── KPICard.tsx
+│   │   │       ├── CategoryChart.tsx
+│   │   │       ├── RecentWorkOrderTable.tsx
+│   │   │       └── TopContractorStats.tsx
+│   │   │
+│   │   └── maintenance/                    [유지보수 관리]
+│   │       ├── workorders/                 [민원 관리]
+│   │       │   ├── page.tsx                [보드 뷰]
+│   │       │   ├── components/
+│   │       │   │   ├── WorkOrderBoard.tsx
+│   │       │   │   ├── WorkOrderColumn.tsx
+│   │       │   │   ├── WorkOrderCardDraggable.tsx
+│   │       │   │   ├── FilterBar.tsx
+│   │       │   │   ├── ViewToggle.tsx
+│   │       │   │   └── BulkActions.tsx
+│   │       │   │
+│   │       │   └── [id]/                   [상세 뷰]
+│   │       │       ├── page.tsx
+│   │       │       └── components/
+│   │       │           ├── WorkOrderInfoCard.tsx
+│   │       │           ├── ContractorAssignCard.tsx
+│   │       │           ├── RecommendedContractors.tsx
+│   │       │           ├── TimeMetrics.tsx
+│   │       │           ├── AttachmentSection.tsx
+│   │       │           ├── TimelineSection.tsx
+│   │       │           └── AdminActions.tsx
+│   │       │
+│   │       ├── contractors/                [업체 관리]
+│   │       │   ├── page.tsx                [목록]
+│   │       │   ├── components/
+│   │       │   │   ├── ContractorHeader.tsx
+│   │       │   │   ├── ContractorSearch.tsx
+│   │       │   │   ├── ContractorTable.tsx
+│   │       │   │   └── Pagination.tsx
+│   │       │   │
+│   │       │   └── [id]/                   [상세]
+│   │       │       ├── page.tsx
+│   │       │       └── components/
+│   │       │           ├── ContractorForm.tsx
+│   │       │           ├── PerformanceStats.tsx
+│   │       │           ├── AssignedWorkOrders.tsx
+│   │       │           └── DeleteButton.tsx
+│   │       │
+│   │       └── guides/                     [예방 정비 가이드]
+│   │           ├── page.tsx                [목록]
+│   │           ├── components/
+│   │           │   ├── GuideHeader.tsx
+│   │           │   ├── FilterBar.tsx
+│   │           │   ├── SortDropdown.tsx
+│   │           │   └── MaintenanceGuideCard.tsx
+│   │           │
+│   │           └── create/                 [작성]
+│   │               ├── page.tsx
+│   │               └── components/
+│   │                   ├── GuideForm.tsx
+│   │                   ├── DurationInput.tsx
+│   │                   ├── RoomCheckbox.tsx
+│   │                   └── FormActions.tsx
+│   │
+│   └── vendor/                             [협력 업체 영역]
+│       ├── layout.tsx
+│       └── work-orders/                    [배정 민원]
+│           ├── page.tsx
+│           └── components/
+│               ├── ContractorWorkOrderCard.tsx
+│               ├── FilterBar.tsx
+│               └── StatusChangeButton.tsx
+│
+├── components/                             [공통 컴포넌트]
+│   ├── ui/                                 [shadcn/ui 컴포넌트]
+│   │   ├── button.tsx                      [기본 버튼]
+│   │   ├── input.tsx
+│   │   ├── textarea.tsx
+│   │   ├── select.tsx
+│   │   ├── card.tsx
+│   │   ├── badge.tsx
+│   │   ├── dialog.tsx
+│   │   ├── label.tsx
+│   │   ├── checkbox.tsx
+│   │   ├── radio-group.tsx
+│   │   ├── separator.tsx
+│   │   └── types.ts
+│   │
+│   ├── workorder/                          [민원 관련 공통]
+│   │   ├── StatusBadge.tsx
+│   │   ├── PriorityBadge.tsx
+│   │   ├── WorkOrderCard.tsx
+│   │   ├── FilterBar.tsx
+│   │   ├── SortDropdown.tsx
+│   │   └── Timeline.tsx
+│   │
+│   ├── contractor/                         [업체 관련 공통]
+│   │   ├── ContractorInfoCard.tsx
+│   │   ├── RatingDisplay.tsx
+│   │   └── ContractorBadge.tsx
+│   │
+│   ├── dashboard/                          [대시보드 공통]
+│   │   ├── StatCard.tsx
+│   │   ├── Chart.tsx
+│   │   └── EmptyState.tsx
+│   │
+│   ├── form/                               [폼 관련 공통]
+│   │   ├── FormInput.tsx
+│   │   ├── FormSelect.tsx
+│   │   ├── FormTextArea.tsx
+│   │   ├── FormCheckbox.tsx
+│   │   ├── FormRadioGroup.tsx
+│   │   └── FormError.tsx
+│   │
+│   ├── upload/                             [파일 업로드 공통]
+│   │   ├── ImageUpload.tsx
+│   │   ├── ImagePreview.tsx
+│   │   ├── DragDropZone.tsx
+│   │   └── FilePreview.tsx
+│   │
+│   ├── layout/                             [레이아웃 공통]
+│   │   ├── Header.tsx
+│   │   ├── Sidebar.tsx
+│   │   ├── Navigation.tsx
+│   │   ├── PageHeader.tsx
+│   │   └── Container.tsx
+│   │
+│   ├── common/                             [기타 공통]
+│   │   ├── Loading.tsx
+│   │   ├── Skeleton.tsx
+│   │   ├── Toast.tsx
+│   │   ├── Modal.tsx
+│   │   ├── ConfirmDialog.tsx
+│   │   └── EmptyState.tsx
+│   │
+│   └── landing/                            [랜딩 페이지 컴포넌트]
+│       ├── Navbar.tsx
+│       ├── HeroSection.tsx
+│       ├── UnitManagementSection.tsx
+│       ├── LedgerSection.tsx
+│       ├── Footer.tsx
+│       └── MenuIcon.tsx
+│
+├── hooks/                                  [Custom Hooks]
+│   ├── useBuildings.ts                     [기존]
+│   ├── useRooms.ts                         [기존]
+│   ├── useTenants.ts                       [기존]
+│   ├── usePayments.ts                      [기존]
+│   ├── useWorkOrders.ts                    [신규]
+│   ├── useContractors.ts                   [신규]
+│   ├── useMaintenanceGuides.ts             [신규]
+│   ├── useDragAndDrop.ts                   [신규]
+│   └── useForm.ts                          [신규]
+│
+├── lib/                                    [유틸리티]
+│   ├── axios.ts                            [Axios 설정]
+│   ├── firebase.ts                         [Firebase 초기화]
+│   ├── utils.ts                            [범용 유틸]
+│   ├── date.ts                             [날짜 함수]
+│   └── validation.ts                       [Zod 스키마]
+│
+└── store/                                  [상태 관리]
+    └── useAuthStore.ts                     [Zustand 스토어]
+
+
+통계 요약
+==========
+
+📄 페이지 파일 수:        17개
+  - Tenant:     4개 (dashboard, list, create, detail)
+  - Admin:      7개 (dashboard, board, detail, contractor list/detail, guide list/create)
+  - Vendor:     1개 (workorders)
+  - Layout:     3개 (tenant, admin, vendor)
+
+🧩 페이지별 컴포넌트:     54개
+  - Tenant:     8개
+  - Admin:      34개
+  - Vendor:     4개
+  - Page-specific: 8개
+
+🎨 공통 컴포넌트:         44개
+  - UI (shadcn): 11개
+  - workorder:   6개
+  - contractor:  3개
+  - dashboard:   3개
+  - form:        6개
+  - upload:      4개
+  - layout:      5개
+  - common:      6개
+
+🪝 Custom Hooks:         9개
+  - 기존:       4개 (Buildings, Rooms, Tenants, Payments)
+  - 신규:       5개 (WorkOrders, Contractors, MaintenanceGuides, DragAndDrop, Form)
+
+📝 유틸리티 파일:        5개
+  - lib:        5개 (axios, firebase, utils, date, validation)
+
+📦 총 파일 수:          129개
+
+
+구조 특징
+==========
+
+✓ Domain-Driven: 도메인별 폴더 구조 (tenant, admin, vendor)
+✓ Feature-Based: 기능별로 page.tsx와 components 분리
+✓ Reusable: 공통 컴포넌트 중앙 집중식 관리
+✓ Scalable: 각 도메인 독립적 성장 가능
+✓ Type-Safe: TypeScript 기반 Props 정의
+✓ Testable: 작은 단위 컴포넌트로 테스트 용이
+✓ Accessible: a11y 고려한 컴포넌트 설계
+
+
+파일 명명 규칙
+==============
+
+Pages:        page.tsx (Next.js 컨벤션)
+Layouts:      layout.tsx
+Components:   PascalCase.tsx (e.g., WorkOrderCard.tsx)
+Hooks:        useCamelCase.ts (e.g., useWorkOrders.ts)
+Utils:        camelCase.ts (e.g., validation.ts)
+Types:        types.ts 또는 FileName.types.ts
+
+
+Next.js 라우팅 맵
+=================
+
+/                           → app/page.tsx
+/login                      → app/login/page.tsx
+/tenant/dashboard           → app/tenant/dashboard/page.tsx
+/tenant/work-orders         → app/tenant/work-orders/page.tsx
+/tenant/work-orders/create  → app/tenant/work-orders/create/page.tsx
+/tenant/work-orders/:id     → app/tenant/work-orders/[id]/page.tsx
+/admin/dashboard            → app/admin/dashboard/page.tsx
+/admin/maintenance/workorders              → app/admin/maintenance/workorders/page.tsx
+/admin/maintenance/workorders/:id          → app/admin/maintenance/workorders/[id]/page.tsx
+/admin/maintenance/contractors             → app/admin/maintenance/contractors/page.tsx
+/admin/maintenance/contractors/:id         → app/admin/maintenance/contractors/[id]/page.tsx
+/admin/maintenance/guides                  → app/admin/maintenance/guides/page.tsx
+/admin/maintenance/guides/create           → app/admin/maintenance/guides/create/page.tsx
+/vendor/work-orders         → app/vendor/work-orders/page.tsx
+
+
+레이아웃 계층
+=============
+
+RootLayout (app/layout.tsx)
+├── LandingLayout (for /)
+│   ├── Navbar
+│   └── Footer
+├── TenantLayout (app/tenant/layout.tsx)
+│   ├── TenantHeader
+│   ├── TenantSidebar
+│   └── TenantContent
+├── AdminLayout (app/admin/layout.tsx)
+│   ├── AdminHeader
+│   ├── AdminSidebar
+│   └── AdminContent
+└── VendorLayout (app/vendor/layout.tsx)
+    ├── VendorHeader
+    ├── VendorSidebar
+    └── VendorContent
+
+
+생성 순서 (Priority Order)
+==========================
+
+Phase 1 (필수 기반, 1주)
+  [ ] 공통 UI 컴포넌트 (form, upload, common)
+  [ ] 공통 domain 컴포넌트 (badge, card, timeline)
+
+Phase 2 (Tenant, 1.5주)
+  [ ] /tenant/layout.tsx
+  [ ] /tenant/dashboard
+  [ ] /tenant/work-orders
+  [ ] /tenant/work-orders/create
+  [ ] /tenant/work-orders/[id]
+
+Phase 3 (Admin, 2주)
+  [ ] /admin/layout.tsx (기존 확장)
+  [ ] /admin/dashboard
+  [ ] /admin/maintenance/workorders (보드)
+  [ ] /admin/maintenance/workorders/[id]
+  [ ] /admin/maintenance/contractors
+  [ ] /admin/maintenance/contractors/[id]
+  [ ] /admin/maintenance/guides
+  [ ] /admin/maintenance/guides/create
+
+Phase 4 (Vendor, 1주)
+  [ ] /vendor/layout.tsx
+  [ ] /vendor/work-orders
+
+Phase 5 (최적화, 1주)
+  [ ] Layout 컴포넌트 (Header, Sidebar, Navigation)
+  [ ] 반응형 테스트
+  [ ] 접근성 검사
+  [ ] 성능 최적화

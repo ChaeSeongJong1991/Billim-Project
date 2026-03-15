@@ -45,37 +45,6 @@ data class UpdateMaintenanceGuideRequest(
 )
 
 /**
- * 예방정비 가이드 기본 응답
- */
-data class MaintenanceGuideResponse(
-    @field:NotNull(message = "가이드 ID는 필수입니다.")
-    val id: Long,
-
-    @field:NotBlank(message = "항목명은 필수입니다.")
-    @JsonProperty("item_name")
-    val itemName: String,
-
-    @field:NotBlank(message = "카테고리는 필수입니다.")
-    val category: String,
-
-    @field:NotNull(message = "교체 주기(개월)는 필수입니다.")
-    @JsonProperty("replacement_interval_months")
-    val replacementIntervalMonths: Int
-)
-
-/**
- * 예방정비 가이드 목록 응답
- */
-data class MaintenanceGuideListResponse(
-    @field:NotNull(message = "가이드 목록은 필수입니다.")
-    val guides: List<MaintenanceGuideResponse> = emptyList(),
-
-    @field:NotNull(message = "전체 개수는 필수입니다.")
-    @JsonProperty("total_count")
-    val totalCount: Int = 0
-)
-
-/**
  * 예방정비 스케줄 응답
  */
 data class MaintenanceScheduleResponse(

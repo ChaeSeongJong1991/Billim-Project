@@ -25,8 +25,12 @@ class PreventiveMaintenanceController {
     ): ResponseEntity<MaintenanceGuideListResponse> {
         // 서비스 호출: maintenanceService.getGuideList(userDetails.username, unitId, page, pageSize)
         val response = MaintenanceGuideListResponse(
-            guides = emptyList(),
-            totalCount = 0
+            content = emptyList(),
+            totalElements = 0L,
+            totalPages = 0,
+            currentPage = page,
+            pageSize = pageSize,
+            hasNext = false
         )
         return ResponseEntity.ok(response)
     }
@@ -38,7 +42,7 @@ class PreventiveMaintenanceController {
     @PostMapping
     fun createMaintenanceGuide(
         @AuthenticationPrincipal userDetails: UserDetails,
-        @Valid @RequestBody request: CreateMaintenanceGuideRequest
+        @Valid @RequestBody request: MaintenanceGuideCreateRequest
     ): ResponseEntity<Long> {
         // 서비스 호출: maintenanceService.createGuide(userDetails.username, request)
         val guideId = 1L
@@ -57,9 +61,15 @@ class PreventiveMaintenanceController {
         // 서비스 호출: maintenanceService.getGuide(userDetails.username, id)
         val response = MaintenanceGuideResponse(
             id = id,
-            itemName = "에어컨 필터",
-            category = "COOLING",
-            replacementIntervalMonths = 6
+            title = "에어컨 필터",
+            category = com.billim.domain.workorder.domain.WorkOrderCategory.ELECTRICAL,
+            intervalMonths = 6,
+            baseExecutionDate = java.time.LocalDate.now(),
+            nextScheduledAt = java.time.LocalDate.now().plusMonths(6),
+            isOverdue = false,
+            affectedRoomCount = 0,
+            createdAt = java.time.LocalDateTime.now(),
+            updatedAt = java.time.LocalDateTime.now()
         )
         return ResponseEntity.ok(response)
     }
@@ -72,7 +82,7 @@ class PreventiveMaintenanceController {
     fun updateMaintenanceGuide(
         @AuthenticationPrincipal userDetails: UserDetails,
         @PathVariable id: Long,
-        @Valid @RequestBody request: UpdateMaintenanceGuideRequest
+        @Valid @RequestBody request: MaintenanceGuideUpdateRequest
     ): ResponseEntity<Unit> {
         // 서비스 호출: maintenanceService.updateGuide(userDetails.username, id, request)
         return ResponseEntity.ok().build()

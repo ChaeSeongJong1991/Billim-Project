@@ -84,3 +84,126 @@ lerna-debug.log*
 # gradlew
 # gradlew.bat
 # gradle/
+
+# ============================================================================
+# 🔒 ACCESSIBILITY VALIDATION CHECKLIST (WCAG 2.1 Level AA)
+# ============================================================================
+#
+# 이 섹션은 접근성 검증을 위한 가이드입니다.
+# 배포 전에 아래 항목들을 반드시 확인하세요.
+#
+# 문서: docs/ACCESSIBILITY.md를 참조하세요.
+
+# ✓ 색상 대비 (Contrast Ratio)
+# - [ ] 본문 텍스트: 4.5:1 이상 (14px 이상)
+# - [ ] 큰 텍스트: 3:1 이상 (18px+ 굵음)
+# - [ ] UI 컴포넌트 경계: 3:1 이상
+# - [ ] 포커스 인디케이터: 3:1 이상
+# - [ ] 상태 정보가 색상 + 다른 수단(아이콘, 텍스트)으로 표현
+#
+# 검증 도구:
+# - WebAIM Contrast Checker: https://webaim.org/resources/contrastchecker/
+# - Color Blindness Simulator: https://www.color-blindness.com/coblis-color-blindness-simulator/
+
+# ✓ ARIA 라벨 (Accessible Rich Internet Applications)
+# - [ ] 모든 폼 필드에 label 또는 aria-label
+# - [ ] 아이콘 버튼에 aria-label
+# - [ ] 폼 에러에 aria-invalid="true"
+# - [ ] 로딩 상태에 aria-busy
+# - [ ] 동적 콘텐츠에 aria-live (role="status" 또는 role="alert")
+# - [ ] 시맨틱 HTML 사용 (header, nav, main, footer, article, section)
+#
+# 예시: docs/ACCESSIBILITY.md → "ARIA 라벨 및 시맨틱" 섹션
+
+# ✓ 키보드 네비게이션
+# - [ ] Tab 키로 모든 인터랙티브 요소 접근 가능
+# - [ ] Tab 순서가 논리적 (시각적 순서와 일치)
+# - [ ] Escape 키로 모달/팝업 닫힘
+# - [ ] 화살표 키로 라디오/선택 컨트롤 조작 가능
+# - [ ] 포커스가 명확히 표시됨 (최소 2px outline)
+#
+# 테스트: 마우스를 분리하고 Tab 키만 사용해 네비게이션 확인
+
+# ✓ 포커스 상태
+# - [ ] Outline 스타일: 최소 2px, 명확한 색상 (#2563EB 권장)
+# - [ ] Outline offset: 최소 2px
+# - [ ] 모든 포커스 인디케이터가 배경색과 최소 3:1 대비
+# - [ ] Focus trap이 모달에 구현됨
+# - [ ] 포커스가 페이지 전환 후 복원됨
+#
+# CSS 예시:
+# button { focus-visible: outline-2 outline-offset-2 outline-blue-600 }
+
+# ✓ 폼 접근성
+# - [ ] 모든 input에 label (htmlFor 연결 또는 aria-label)
+# - [ ] 필수 필드에 aria-required="true"
+# - [ ] 에러 메시지에 aria-describedby 연결
+# - [ ] 라디오/체크박스에 fieldset + legend
+# - [ ] Select에 적절한 레이블
+# - [ ] 폼 그룹이 명확히 구분됨 (fieldset)
+#
+# 예시: docs/ACCESSIBILITY.md → "폼 접근성" 섹션
+
+# ✓ 이미지 및 대체 텍스트
+# - [ ] 모든 의미있는 이미지에 alt 속성
+# - [ ] 장식 이미지에 alt="" + aria-hidden="true"
+# - [ ] 복잡한 이미지에 figcaption 또는 aria-describedby
+# - [ ] 배경 이미지에 role="img" + aria-label
+# - [ ] 아이콘에 aria-hidden="true" (텍스트가 있을 경우)
+#
+# Alt 텍스트 가이드:
+# - "이미지" ✗ (너무 일반적)
+# - "관악아파트 로비 사진" ✓ (구체적)
+
+# ✓ 색상 블라인드 지원
+# - [ ] 색상만으로 정보 전달 금지
+# - [ ] 아이콘 + 텍스트 + 색상으로 정보 전달
+# - [ ] 상태 배지에 아이콘 포함 (예: 🔴 높음)
+# - [ ] 차트에 색상 + 패턴 사용
+#
+# 시뮬레이션: Deuteranopia 모드에서 색상 구분 가능한지 확인
+
+# ✓ 텍스트 크기 및 가독성
+# - [ ] 본문 텍스트: 최소 14px (권장 16px)
+# - [ ] 줄 간격: 1.5 이상
+# - [ ] 문자 간격: 0.5px 이상
+# - [ ] 텍스트가 200% 확대될 때도 깨지지 않음
+# - [ ] 언어가 명확하고 간결함 (긴 문장 피하기)
+#
+# CSS: font-size는 px 대신 rem 사용 (사용자 설정 따름)
+
+# ✓ 자동화 검증 도구
+# - [ ] axe DevTools 검사: 0개 Critical, 0개 Serious 이슈
+# - [ ] Lighthouse Accessibility 점수: 90점 이상
+# - [ ] WAVE 검사: 에러 0개, 대비 문제 0개
+#
+# 설치:
+# - axe DevTools: Chrome Web Store
+# - WAVE: Chrome Web Store
+# - Lighthouse: Chrome DevTools (F12) → Lighthouse 탭
+
+# ✓ 수동 검증
+# - [ ] 키보드 네비게이션: Tab, Shift+Tab, Escape, 화살표 키 테스트
+# - [ ] 스크린 리더: NVDA(Windows) 또는 VoiceOver(macOS)로 테스트
+# - [ ] 색상 블라인드: Coblis 시뮬레이터로 테스트
+# - [ ] 텍스트 크기: 200% 확대 시 레이아웃 깨짐 없음
+#
+# 도구:
+# - NVDA: https://www.nvaccess.org/
+# - Coblis: https://www.color-blindness.com/coblis-color-blindness-simulator/
+
+# ============================================================================
+# 배포 전 최종 체크리스트
+# ============================================================================
+# - [ ] docs/ACCESSIBILITY.md 읽기 (전체 구현 가이드)
+# - [ ] axe DevTools로 자동 검사 실행
+# - [ ] Lighthouse Accessibility 점수 확인 (90점 이상)
+# - [ ] WAVE로 최종 검사
+# - [ ] 키보드로만 전체 플로우 테스트
+# - [ ] 스크린 리더(VoiceOver 또는 NVDA)로 주요 페이지 테스트
+# - [ ] 색상 블라인드 시뮬레이션에서 정보 전달 가능 확인
+#
+# 문제 발견 시:
+# 1. docs/ACCESSIBILITY.md의 해당 섹션 참조
+# 2. 컴포넌트별 구현 예시 확인
+# 3. 해결 후 다시 검증 도구 실행
