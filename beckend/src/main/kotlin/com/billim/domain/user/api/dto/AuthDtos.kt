@@ -1,39 +1,27 @@
 package com.billim.domain.user.api.dto
 
-import jakarta.validation.constraints.Email
-import jakarta.validation.constraints.NotBlank
-import jakarta.validation.constraints.Size
 import com.billim.domain.user.domain.AuthProvider
+import jakarta.validation.constraints.NotBlank
 
-// 회원가입 요청
-data class SignUpRequest(
-    @field:Email(message = "이메일 형식이 올바르지 않습니다.")
-    @field:NotBlank
-    val email: String,
+// 소셜 로그인 요청 (Google/Kakao — 프론트에서 access/id token 전달)
+data class SocialLoginRequest(
+    @field:NotBlank(message = "토큰이 필요합니다.")
+    val idToken: String,
 
-    @field:NotBlank
-    @field:Size(min = 8, message = "비밀번호는 8자 이상이어야 합니다.")
-    val password: String,
-
-    @field:NotBlank
-    val name: String,
-
-    val provider: AuthProvider = AuthProvider.LOCAL
+    val provider: AuthProvider
 )
 
-// 로그인 요청
-data class SignInRequest(
-    @field:Email
+// Naver OAuth 콜백 요청 (authorization code 방식)
+data class NaverCallbackRequest(
     @field:NotBlank
-    val email: String,
+    val code: String,
 
     @field:NotBlank
-    val password: String
+    val state: String
 )
 
-// 토큰 응답 (프론트엔드로 내려줄 데이터)
+// 토큰 응답
 data class TokenResponse(
     val accessToken: String,
-    val refreshToken: String, // 추후 Redis 연동 시 사용
     val tokenType: String = "Bearer"
 )

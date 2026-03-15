@@ -16,10 +16,9 @@ class UserDetailsServiceImpl(
         val user = userRepository.findByEmail(email)
             ?: throw UsernameNotFoundException("사용자를 찾을 수 없습니다: $email")
 
-        // Security의 User 객체로 변환
         return org.springframework.security.core.userdetails.User(
             user.email,
-            user.password,
+            user.password ?: "", // 소셜 로그인 사용자는 비밀번호 없음
             listOf(SimpleGrantedAuthority("ROLE_${user.role}"))
         )
     }

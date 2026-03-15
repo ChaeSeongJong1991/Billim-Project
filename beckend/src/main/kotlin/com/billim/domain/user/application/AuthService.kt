@@ -1,71 +1,144 @@
 package com.billim.domain.user.application
 
-import com.billim.domain.user.api.dto.SignInRequest
-import com.billim.domain.user.api.dto.SignUpRequest
+import com.billim.domain.user.api.dto.NaverCallbackRequest
+import com.billim.domain.user.api.dto.SocialLoginRequest
 import com.billim.domain.user.api.dto.TokenResponse
+import com.billim.domain.user.domain.AuthProvider
 import com.billim.domain.user.domain.User
 import com.billim.domain.user.infra.UserRepository
 import com.billim.global.security.jwt.JwtTokenProvider
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 import org.slf4j.LoggerFactory
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
-import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.web.client.RestTemplate
 
 @Service
-@Transactional(readOnly = true) // 기본적으로 읽기 전용 (성능 최적화)
+@Transactional(readOnly = true)
 class AuthService(
     private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder,
     private val jwtTokenProvider: JwtTokenProvider,
-    private val authenticationManagerBuilder: AuthenticationManagerBuilder
+    private val restTemplate: RestTemplate
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     /**
-     * 회원가입
+     * 소셜 로그인 — 최초 로그인 시 자동 회원가입
      */
-    @Transactional // 쓰기 작업이므로 readOnly = false
-    fun signUp(request: SignUpRequest): Long {
-        logger.info("Signing up user with email: {}", request.email)
-        // 1. 이메일 중복 검사
-        if (userRepository.existsByEmail(request.email)) {
-            throw IllegalArgumentException("이미 가입된 이메일입니다.") // 추후 Custom Exception으로 교체 권장
+    @Transactional
+    fun socialLogin(request: SocialLoginRequest): TokenResponse {
+        val (email, name, providerId) = when (request.provider) {
+            AuthProvider.GOOGLE -> verifyGoogleToken(request.idToken)
+            AuthProvider.KAKAO  -> verifyKakaoToken(request.idToken)
+            AuthProvider.NAVER  -> verifyNaverToken(request.idToken)
         }
 
-        // 2. 비밀번호 암호화 및 User 엔티티 생성
-        val user = User(
-            email = request.email,
-            password = passwordEncoder.encode(request.password),
-            name = request.name,
-            provider = request.provider
-        )
+        logger.info("Social login: provider={}, email={}", request.provider, email)
 
-        // 3. 저장
-        return userRepository.save(user).id!!
+        val user = userRepository.findByEmail(email) ?: run {
+            logger.info("신규 사용자 자동 가입: {}", email)
+            userRepository.save(
+                User(
+                    email      = email,
+                    name       = name,
+                    provider   = request.provider,
+                    providerId = providerId
+                )
+            )
+        }
+
+        val accessToken = jwtTokenProvider.createAccessToken(user.email, user.role)
+        return TokenResponse(accessToken)
     }
 
-    /**
-     * 로그인
-     */
-    @Transactional // 로그인 실패 기록이나 LastLogin 업데이트 등을 위해 트랜잭션 필요 가능성 있음
-    fun signIn(request: SignInRequest): TokenResponse {
-        // 1. ID/PW를 기반으로 Authentication 객체 생성
-        // 아직 인증되지 않은 토큰입니다.
-        val authenticationToken = UsernamePasswordAuthenticationToken(request.email, request.password)
+    // ── Google (Firebase ID Token 검증) ──────────────────────────────────────
 
-        // 2. 실제 검증 (여기서 loadUserByUsername 호출됨 -> 비밀번호 체크)
-        // 실패 시 AuthenticationException 발생
-        val authentication = authenticationManagerBuilder.`object`.authenticate(authenticationToken)
+    private fun verifyGoogleToken(idToken: String): Triple<String, String, String> {
+        check(FirebaseApp.getApps().isNotEmpty()) {
+            "Firebase가 초기화되지 않았습니다. serviceAccountKey.json을 확인해주세요."
+        }
+        val decoded = FirebaseAuth.getInstance().verifyIdToken(idToken)
+        val email = decoded.email
+            ?: throw IllegalArgumentException("Google 계정에 이메일이 없습니다.")
+        return Triple(email, decoded.name ?: "사용자", decoded.uid)
+    }
 
-        // 3. 인증 정보로 JWT 토큰 생성
-        val accessToken = jwtTokenProvider.createAccessToken(authentication)
-        
-        // Refresh Token 생성 로직 (현재는 Access와 동일하게 발급하거나 별도 로직 추가 가능)
-        // MVP 단계에서는 일단 Access Token 발급에 집중하고, Refresh는 추후 Redis 연동 시 구현
-        val refreshToken = "dummy-refresh-token" 
+    // ── Kakao (Access Token으로 사용자 정보 조회) ────────────────────────────
 
-        return TokenResponse(accessToken, refreshToken)
+    @Suppress("UNCHECKED_CAST")
+    private fun verifyKakaoToken(accessToken: String): Triple<String, String, String> {
+        val headers = HttpHeaders().apply { set("Authorization", "Bearer $accessToken") }
+        val response = restTemplate.exchange(
+            "https://kapi.kakao.com/v2/user/me",
+            HttpMethod.GET,
+            HttpEntity<String>(headers),
+            Map::class.java
+        )
+        val body = response.body
+            ?: throw IllegalArgumentException("Kakao 사용자 정보를 가져올 수 없습니다.")
+        val kakaoAccount = body["kakao_account"] as? Map<*, *>
+            ?: throw IllegalArgumentException("Kakao 계정 정보가 없습니다.")
+        val email = kakaoAccount["email"] as? String
+            ?: throw IllegalArgumentException("Kakao 이메일 제공 동의가 필요합니다.")
+        val profile = kakaoAccount["profile"] as? Map<*, *>
+        val name = profile?.get("nickname") as? String ?: "카카오 사용자"
+        return Triple(email, name, body["id"]?.toString() ?: "")
+    }
+
+    // ── Naver OAuth Callback (authorization code → access token → user info) ──
+
+    @Transactional
+    fun naverCallback(request: NaverCallbackRequest): TokenResponse {
+        val accessToken = exchangeNaverCode(request.code, request.state)
+        val (email, name, providerId) = verifyNaverToken(accessToken)
+
+        logger.info("Naver login: email={}", email)
+
+        val user = userRepository.findByEmail(email) ?: run {
+            logger.info("신규 사용자 자동 가입 (Naver): {}", email)
+            userRepository.save(
+                User(email = email, name = name, provider = AuthProvider.NAVER, providerId = providerId)
+            )
+        }
+
+        return TokenResponse(jwtTokenProvider.createAccessToken(user.email, user.role))
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun exchangeNaverCode(code: String, state: String): String {
+        val clientId = System.getenv("NAVER_CLIENT_ID")
+            ?: throw IllegalStateException("NAVER_CLIENT_ID 환경변수가 설정되지 않았습니다.")
+        val clientSecret = System.getenv("NAVER_CLIENT_SECRET")
+            ?: throw IllegalStateException("NAVER_CLIENT_SECRET 환경변수가 설정되지 않았습니다.")
+        val url = "https://nid.naver.com/oauth2.0/token?grant_type=authorization_code" +
+                  "&client_id=$clientId&client_secret=$clientSecret&code=$code&state=$state"
+        val response = restTemplate.getForObject(url, Map::class.java)
+        return response?.get("access_token") as? String
+            ?: throw IllegalArgumentException("Naver access token 발급에 실패했습니다.")
+    }
+
+    // ── Naver (Access Token으로 사용자 정보 조회) ────────────────────────────
+
+    @Suppress("UNCHECKED_CAST")
+    private fun verifyNaverToken(accessToken: String): Triple<String, String, String> {
+        val headers = HttpHeaders().apply { set("Authorization", "Bearer $accessToken") }
+        val response = restTemplate.exchange(
+            "https://openapi.naver.com/v1/nid/me",
+            HttpMethod.GET,
+            HttpEntity<String>(headers),
+            Map::class.java
+        )
+        val body = response.body
+            ?: throw IllegalArgumentException("Naver 사용자 정보를 가져올 수 없습니다.")
+        val responseData = body["response"] as? Map<*, *>
+            ?: throw IllegalArgumentException("Naver 응답이 없습니다.")
+        val email = responseData["email"] as? String
+            ?: throw IllegalArgumentException("Naver 이메일 제공 동의가 필요합니다.")
+        val name = responseData["name"] as? String ?: "네이버 사용자"
+        return Triple(email, name, responseData["id"] as? String ?: "")
     }
 }
