@@ -12,7 +12,7 @@ spring:
   # JPA / Hibernate
   jpa:
     hibernate:
-      ddl-auto: create # 스키마 불일치 해결을 위해 create로 변경 (재시작 후 update로 복구 권장)
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true # 쿼리 가독성 향상
