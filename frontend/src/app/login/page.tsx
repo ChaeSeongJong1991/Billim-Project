@@ -55,12 +55,23 @@ export default function LoginPage() {
 
       await callSocialLogin(idToken, "GOOGLE", userName, userEmail);
     } catch (error: unknown) {
-      const code = (error as { code?: string })?.code;
-      if (code === "auth/popup-closed-by-user") return; // 사용자가 닫은 경우 무시
+      const firebaseError = error as { code?: string; message?: string };
+      const code = firebaseError?.code ?? "";
 
+      if (code === "auth/popup-closed-by-user" || code === "auth/cancelled-popup-request") return;
+
+      // auth/unauthorized-domain: Firebase Console에서 localhost 허용 필요
+      const friendlyMessage =
+        code === "auth/unauthorized-domain"
+          ? "Firebase Console에서 localhost를 승인된 도메인에 추가해주세요."
+          : code === "auth/popup-blocked"
+          ? "팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요."
+          : firebaseError?.message ?? "Google 로그인 중 오류가 발생했습니다.";
+
+      console.error("[Google Login Error]", code, firebaseError?.message);
       showAlert({
-        title: "Google 로그인 실패",
-        message: "Google 로그인 중 오류가 발생했습니다.",
+        title: `Google 로그인 실패 (${code || "unknown"})`,
+        message: friendlyMessage,
         variant: "DANGER",
       });
     } finally {

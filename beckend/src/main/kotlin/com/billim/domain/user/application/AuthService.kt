@@ -57,14 +57,28 @@ class AuthService(
 
     // ── Google (Firebase ID Token 검증) ──────────────────────────────────────
 
+    @Suppress("UNCHECKED_CAST")
     private fun verifyGoogleToken(idToken: String): Triple<String, String, String> {
-        check(FirebaseApp.getApps().isNotEmpty()) {
-            "Firebase가 초기화되지 않았습니다. serviceAccountKey.json을 확인해주세요."
+        // Firebase Admin SDK가 초기화된 경우 우선 사용 (보안 강함)
+        if (FirebaseApp.getApps().isNotEmpty()) {
+            val decoded = FirebaseAuth.getInstance().verifyIdToken(idToken)
+            val email = decoded.email
+                ?: throw IllegalArgumentException("Google 계정에 이메일이 없습니다.")
+            return Triple(email, decoded.name ?: "사용자", decoded.uid)
         }
-        val decoded = FirebaseAuth.getInstance().verifyIdToken(idToken)
-        val email = decoded.email
+
+        // Fallback: Google tokeninfo API (serviceAccountKey.json 없는 환경)
+        logger.warn("Firebase Admin 미초기화 — Google tokeninfo API로 fallback 검증")
+        val response = restTemplate.getForObject(
+            "https://oauth2.googleapis.com/tokeninfo?id_token=$idToken",
+            Map::class.java
+        ) ?: throw IllegalArgumentException("Google 토큰 검증에 실패했습니다.")
+
+        val email = response["email"] as? String
             ?: throw IllegalArgumentException("Google 계정에 이메일이 없습니다.")
-        return Triple(email, decoded.name ?: "사용자", decoded.uid)
+        val name = response["name"] as? String ?: "사용자"
+        val sub = response["sub"] as? String ?: ""
+        return Triple(email, name, sub)
     }
 
     // ── Kakao (Access Token으로 사용자 정보 조회) ────────────────────────────
