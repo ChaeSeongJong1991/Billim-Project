@@ -1,5 +1,17 @@
+# OS generated files
+.DS_Store
+**/.DS_Store
 
-# Claude Code (v6 Post-Dev Workflow)
-.claude/handoff.md
-.claude/checkpoints/
-.claude/web-checklist-state.json
+# IDEs and Editors
+.vscode/
+.idea/
+.claude/
+
+# Build Output
+.gradle/
+build/
+**/build/
+/out/
+**/node_modules/
+**/.next/
+

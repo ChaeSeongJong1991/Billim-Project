@@ -10,40 +10,79 @@ import java.time.LocalDate
 class Contract(
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "building_id", nullable = false)
-    val building: Building, // 어느 건물에 대한 계약인지
+    val building: Building,
 
     @Column(nullable = false)
-    val roomNumber: String, // 호수 (예: 201호)
+    val roomNumber: String,
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    var contractType: ContractType,
 
     @Column(nullable = false)
-    val tenantName: String, // 세입자 성함
+    var tenantName: String,
 
     @Column(nullable = false)
-    val tenantPhone: String, // 세입자 연락처
+    var tenantPhone: String,
 
     @Column(nullable = false)
-    val deposit: Long, // 보증금 (단위: 원)
+    var deposit: Long,
 
     @Column(nullable = false)
-    val monthlyRent: Long, // 월세 (단위: 원)
+    var monthlyRent: Long,
 
     @Column(nullable = false)
-    val rentDay: Int, // 월세 납부일 (1~31)
+    var maintenanceFee: Long = 0,
 
     @Column(nullable = false)
-    val startDate: LocalDate, // 계약 시작일
+    var rentDay: Int,
 
     @Column(nullable = false)
-    val endDate: LocalDate  // 계약 종료일
+    var startDate: LocalDate,
+
+    @Column(nullable = false)
+    var endDate: LocalDate,
+
+    @Column(nullable = false)
+    var householdCount: Int = 1,
+
+    @Column(length = 500)
+    var memo: String? = null
 
 ) : BaseEntity() {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null
 
-    // 비즈니스 로직: 계약 기간 유효성 검증
     init {
         require(endDate.isAfter(startDate)) { "계약 종료일은 시작일보다 뒤여야 합니다." }
         require(rentDay in 1..31) { "월세 납부일은 1일에서 31일 사이여야 합니다." }
+    }
+
+    fun update(
+        contractType: ContractType,
+        tenantName: String,
+        tenantPhone: String,
+        deposit: Long,
+        monthlyRent: Long,
+        maintenanceFee: Long,
+        rentDay: Int,
+        startDate: LocalDate,
+        endDate: LocalDate,
+        householdCount: Int,
+        memo: String?
+    ) {
+        require(endDate.isAfter(startDate)) { "계약 종료일은 시작일보다 뒤여야 합니다." }
+        this.contractType = contractType
+        this.tenantName = tenantName
+        this.tenantPhone = tenantPhone
+        this.deposit = deposit
+        this.monthlyRent = monthlyRent
+        this.maintenanceFee = maintenanceFee
+        this.rentDay = rentDay
+        this.startDate = startDate
+        this.endDate = endDate
+        this.householdCount = householdCount
+        this.memo = memo
     }
 }

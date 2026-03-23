@@ -13,7 +13,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/admin/dashboard", icon: "📊", label: "대시보드" },
-  { href: "/admin/units",     icon: "🏢", label: "내 건물 관리", requiresBuilding: false },
+  { href: "/admin/units",     icon: "🏢", label: "내 건물 관리", requiresBuilding: true },
   { href: "/admin/ledger",    icon: "💰", label: "수납 장부",    requiresBuilding: true },
   { href: "/admin/maintenance", icon: "🛠", label: "유지보수",  requiresBuilding: true },
 ];

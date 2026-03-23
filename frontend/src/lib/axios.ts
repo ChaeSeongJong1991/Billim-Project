@@ -20,14 +20,17 @@ api.interceptors.request.use(
     (error) => Promise.reject(error)
 );
 
-// [응답 인터셉터] 401(인증 실패) 발생 시 로그아웃 처리 (선택 사항)
+// [응답 인터셉터] 401(인증 실패) 발생 시 로그아웃 처리
 api.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
             // 토큰 만료 등의 이유로 401이 뜨면 강제 로그아웃 시킬 수 있음
             useAuthStore.getState().logout();
-            // window.location.href = '/login'; // 로그인 페이지로 리다이렉트
+            
+            if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
+                window.location.href = '/login?expired=true';
+            }
         }
         return Promise.reject(error);
     }

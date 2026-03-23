@@ -2,7 +2,9 @@
 
 import React, { useState } from 'react';
 import { useBuildings } from '@/hooks/useBuildings';
-import { useLedger, useCollectPayment, useDeletePayment, PaymentResponse, PaymentStatus } from '@/hooks/usePayments';
+import { useLedger, useCollectPayment, useCreatePayment, useDeletePayment, PaymentResponse, PaymentStatus } from '@/hooks/usePayments';
+import { useContracts } from '@/hooks/useContracts';
+import { useRooms } from '@/hooks/useRooms';
 import { useModal } from '@/app/context/ModalContext';
 
 const STATUS_BADGE: Record<PaymentStatus, React.ReactNode> = {
@@ -79,6 +81,82 @@ function CollectModal({
     );
 }
 
+// ─── 수납 기록 추가 모달 ───────────────────────────────────────────────────────
+function PaymentCreateModal({
+    buildingId, initialYear, initialMonth, onClose
+}: {
+    buildingId: number; initialYear: number; initialMonth: number; onClose: () => void;
+}) {
+    const [contractId, setContractId] = useState<number | ''>('');
+    const [year, setYear] = useState(initialYear);
+    const [month, setMonth] = useState(initialMonth);
+    const { data: contracts = [] } = useContracts(buildingId);
+    const { data: rooms = [] } = useRooms(buildingId);
+    const { mutate: createPayment, isPending } = useCreatePayment(buildingId, initialYear, initialMonth);
+    const { showAlert } = useModal();
+
+    const getRoomStatusText = (roomNum: string) => {
+        const room = rooms.find(r => r.roomNumber === roomNum);
+        return room && room.status !== 'OCCUPIED' ? ' (퇴실)' : '';
+    };
+
+    const handleSubmit = () => {
+        if (!contractId) {
+            showAlert({ title: '알림', message: '계약을 선택해주세요.', variant: 'DANGER' });
+            return;
+        }
+        createPayment({ contractId: Number(contractId), billingYear: year, billingMonth: month }, {
+            onSuccess: () => { 
+                showAlert({ title: '성공', message: '청구서가 생성되었습니다.', variant: 'SUCCESS' }); 
+                onClose(); 
+            },
+            onError: () => showAlert({ title: '오류', message: '청구서 생성에 실패했습니다. (이미 존재할 수 있습니다)', variant: 'DANGER' }),
+        });
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+                <div className="bg-slate-50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                    <h3 className="text-lg font-bold text-slate-800">📝 수납 기록 추가</h3>
+                    <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+                </div>
+                <div className="p-6 space-y-4">
+                    <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">계약 (호실 / 세입자)</label>
+                        <select value={contractId} onChange={e => setContractId(Number(e.target.value))}
+                            className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                            <option value="">선택해주세요</option>
+                            {contracts.map(c => (
+                                <option key={c.id} value={c.id}>{c.roomNumber}호 - {c.tenantName}{getRoomStatusText(c.roomNumber)}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="flex gap-4">
+                        <div className="flex-1">
+                            <label className="block text-sm font-bold text-slate-700 mb-1">청구 연도</label>
+                            <input type="number" value={year} onChange={e => setYear(Number(e.target.value))}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                        <div className="flex-1">
+                            <label className="block text-sm font-bold text-slate-700 mb-1">청구 월</label>
+                            <input type="number" min={1} max={12} value={month} onChange={e => setMonth(Number(e.target.value))}
+                                className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                        </div>
+                    </div>
+                </div>
+                <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex gap-3">
+                    <button onClick={onClose} className="flex-1 py-3 bg-white border border-slate-300 text-slate-700 rounded-xl font-bold hover:bg-slate-50">취소</button>
+                    <button onClick={handleSubmit} disabled={isPending || !contractId}
+                        className="flex-1 py-3 bg-slate-800 text-white rounded-xl font-bold hover:bg-slate-900 shadow-lg shadow-slate-500/30 disabled:opacity-50">
+                        {isPending ? '처리 중...' : '추가하기'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 // ─── 메인 페이지 ──────────────────────────────────────────────────────────────
 export default function LedgerPage() {
     const now = new Date();
@@ -88,10 +166,11 @@ export default function LedgerPage() {
     const [search, setSearch] = useState('');
     const [showUnpaidOnly, setShowUnpaidOnly] = useState(false);
     const [collectTarget, setCollectTarget] = useState<PaymentResponse | null>(null);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const { data: buildings = [] } = useBuildings();
     const activeBuildingId = selectedBuildingId ?? buildings[0]?.id ?? null;
-    const { data: ledger, isLoading } = useLedger(activeBuildingId, year, month);
+    const { data: ledger, isFetching } = useLedger(activeBuildingId, year, month);
     const { mutate: deletePayment } = useDeletePayment(activeBuildingId ?? 0, year, month);
     const { showConfirm, showAlert } = useModal();
 
@@ -162,34 +241,42 @@ export default function LedgerPage() {
             </div>
 
             {/* 필터 */}
-            <div className="flex justify-between items-center">
-                <div className="relative">
-                    <input type="text" placeholder="호실 또는 이름 검색" value={search} onChange={e => setSearch(e.target.value)}
-                        className="pl-9 pr-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm w-48 md:w-64" />
-                    <span className="absolute left-3 top-2.5 text-slate-400">🔍</span>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div className="flex items-center gap-2">
+                    <div className="relative">
+                        <input type="text" placeholder="호실 또는 이름 검색" value={search} onChange={e => setSearch(e.target.value)}
+                            className="pl-9 pr-4 py-2 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 text-sm w-48 md:w-64" />
+                        <span className="absolute left-3 top-2.5 text-slate-400">🔍</span>
+                    </div>
+                    <button onClick={() => setShowUnpaidOnly(v => !v)}
+                        className={`px-3 py-2 rounded-lg text-sm font-bold border transition ${showUnpaidOnly ? 'bg-red-50 text-red-600 border-red-200' : 'bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100'}`}>
+                        {showUnpaidOnly ? '전체 보기' : '미납만 보기'}
+                    </button>
                 </div>
-                <button onClick={() => setShowUnpaidOnly(v => !v)}
-                    className={`px-3 py-2 rounded-lg text-sm font-bold border transition ${showUnpaidOnly ? 'bg-red-50 text-red-600 border-red-200' : 'bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100'}`}>
-                    {showUnpaidOnly ? '전체 보기' : '미납만 보기'}
-                </button>
+                {activeBuildingId && (
+                    <button onClick={() => setIsCreateModalOpen(true)}
+                        className="px-4 py-2 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 shadow-sm whitespace-nowrap">
+                        + 수납 기록 추가
+                    </button>
+                )}
             </div>
 
             {/* 로딩 */}
-            {isLoading && (
+            {isFetching && (
                 <div className="space-y-3">
                     {[1, 2, 3].map(i => <div key={i} className="animate-pulse h-16 bg-white rounded-2xl border border-slate-200" />)}
                 </div>
             )}
 
             {/* 데이터 없음 */}
-            {!isLoading && !ledger && (
+            {!isFetching && !ledger && (
                 <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center">
                     <p className="text-slate-400">건물을 선택하면 장부가 표시됩니다.</p>
                 </div>
             )}
 
             {/* 장부 없음 */}
-            {!isLoading && ledger && ledger.payments.length === 0 && (
+            {!isFetching && ledger && ledger.payments.length === 0 && (
                 <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center">
                     <p className="text-slate-400 text-lg">{year}년 {month}월 수납 기록이 없습니다.</p>
                     <p className="text-slate-400 text-sm mt-2">계약에서 청구서를 생성하거나 직접 추가해주세요.</p>
@@ -197,7 +284,7 @@ export default function LedgerPage() {
             )}
 
             {/* [모바일] 카드 리스트 */}
-            {!isLoading && filteredPayments.length > 0 && (
+            {!isFetching && filteredPayments.length > 0 && (
                 <div className="block md:hidden space-y-4">
                     {filteredPayments.map(item => (
                         <div key={item.id}
@@ -250,7 +337,7 @@ export default function LedgerPage() {
             )}
 
             {/* [PC] 테이블 */}
-            {!isLoading && filteredPayments.length > 0 && (
+            {!isFetching && filteredPayments.length > 0 && (
                 <div className="hidden md:block bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                     <table className="w-full text-left border-collapse">
                         <thead className="bg-slate-50 text-slate-500 text-sm uppercase tracking-wide border-b border-slate-200">
@@ -325,6 +412,16 @@ export default function LedgerPage() {
                     year={year}
                     month={month}
                     onClose={() => setCollectTarget(null)}
+                />
+            )}
+
+            {/* 수납 기록 추가 모달 */}
+            {isCreateModalOpen && activeBuildingId && (
+                <PaymentCreateModal
+                    buildingId={activeBuildingId}
+                    initialYear={year}
+                    initialMonth={month}
+                    onClose={() => setIsCreateModalOpen(false)}
                 />
             )}
         </div>

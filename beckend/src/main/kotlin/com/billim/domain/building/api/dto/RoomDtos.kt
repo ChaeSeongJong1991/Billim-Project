@@ -15,7 +15,7 @@ data class RoomCreateRequest(
     @field:NotNull(message = "부동산 유형은 필수입니다.")
     val propertyType: PropertyType,
 
-    @field:Min(value = 1, message = "층수는 1 이상이어야 합니다.")
+    @field:Min(value = -10, message = "층수는 -10 이상이어야 합니다.")
     val floor: Int
 )
 
@@ -28,7 +28,7 @@ data class RoomUpdateRequest(
     @field:NotNull(message = "부동산 유형은 필수입니다.")
     val propertyType: PropertyType,
 
-    @field:Min(value = 1, message = "층수는 1 이상이어야 합니다.")
+    @field:Min(value = -10, message = "층수는 -10 이상이어야 합니다.")
     val floor: Int
 )
 

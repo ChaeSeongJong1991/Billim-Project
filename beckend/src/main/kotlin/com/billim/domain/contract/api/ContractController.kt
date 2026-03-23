@@ -2,6 +2,7 @@ package com.billim.domain.contract.api
 
 import com.billim.domain.contract.api.dto.ContractCreateRequest
 import com.billim.domain.contract.api.dto.ContractResponse
+import com.billim.domain.contract.api.dto.ContractUpdateRequest
 import com.billim.domain.contract.application.ContractService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -32,5 +33,25 @@ class ContractController(
     ): ResponseEntity<List<ContractResponse>> {
         val contracts = contractService.getContractsByBuilding(userDetails.username, buildingId)
         return ResponseEntity.ok(contracts)
+    }
+
+    @GetMapping("/building/{buildingId}/room/{roomNumber}")
+    fun getByRoom(
+        @AuthenticationPrincipal userDetails: UserDetails,
+        @PathVariable buildingId: Long,
+        @PathVariable roomNumber: String
+    ): ResponseEntity<ContractResponse> {
+        val contract = contractService.getContractByRoom(userDetails.username, buildingId, roomNumber)
+        return ResponseEntity.ok(contract)
+    }
+
+    @PutMapping("/{contractId}")
+    fun update(
+        @AuthenticationPrincipal userDetails: UserDetails,
+        @PathVariable contractId: Long,
+        @Valid @RequestBody request: ContractUpdateRequest
+    ): ResponseEntity<Unit> {
+        contractService.update(userDetails.username, contractId, request)
+        return ResponseEntity.ok().build()
     }
 }

@@ -18,6 +18,7 @@ interface ModalOptions {
 interface ModalContextType {
     showAlert: (options: ModalOptions) => void;
     showConfirm: (options: ModalOptions) => void;
+    showToast: (message: string, variant?: ModalVariant) => void;
 }
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
@@ -26,6 +27,10 @@ export function ModalProvider({ children }: { children: ReactNode }) {
     const [isOpen, setIsOpen] = useState(false);
     const [type, setType] = useState<ModalType>('ALERT');
     const [options, setOptions] = useState<ModalOptions>({ title: '', message: '' });
+
+    // Toast 상태
+    const [toastMessage, setToastMessage] = useState<string | null>(null);
+    const [toastVariant, setToastVariant] = useState<ModalVariant>('INFO');
 
     // 1. Alert 열기 (확인 버튼 하나)
     const showAlert = (opts: ModalOptions) => {
@@ -52,11 +57,30 @@ export function ModalProvider({ children }: { children: ReactNode }) {
         closeModal();
     };
 
+    // 5. Toast 알림 열기
+    const showToast = (message: string, variant: ModalVariant = 'INFO') => {
+        setToastMessage(message);
+        setToastVariant(variant);
+        setTimeout(() => setToastMessage(null), 3000); // 3초 뒤 닫힘
+    };
+
     return (
-        <ModalContext.Provider value={{ showAlert, showConfirm }}>
+        <ModalContext.Provider value={{ showAlert, showConfirm, showToast }}>
             {children}
 
-            {/* === 여기가 공통 모달 UI 입니다 === */}
+            {/* === 토스트 알림 UI === */}
+            {toastMessage && (
+                <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[9999] pointer-events-none animate-fade-in-up">
+                    <div className={`px-6 py-3 rounded-full shadow-lg text-white font-medium text-sm border
+                        ${toastVariant === 'DANGER' ? 'bg-red-500 border-red-400' :
+                        toastVariant === 'SUCCESS' ? 'bg-green-500 border-green-400' :
+                        'bg-slate-800 border-slate-700'}`}>
+                        {toastMessage}
+                    </div>
+                </div>
+            )}
+
+            {/* === 기존 모달 UI === */}
             {isOpen && (
                 <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
                     <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden transform transition-all scale-100 animate-fade-in-up">

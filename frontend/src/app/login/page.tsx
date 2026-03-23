@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithPopup } from "firebase/auth";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,18 @@ export default function LoginPage() {
 
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
-  const { showAlert } = useModal();
+  const { showAlert, showToast } = useModal();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('expired') === 'true') {
+        showToast('로그인 세션이 만료로 로그아웃되었습니다.', 'DANGER');
+        // URL 파라미터 제거 (새로고침 시 중복 노출 방지)
+        window.history.replaceState({}, '', '/login');
+      }
+    }
+  }, [showToast]);
 
   // ── 공통: 백엔드 소셜 로그인 호출 ─────────────────────────────────────────
 

@@ -1,11 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useBuildings } from '@/hooks/useBuildings';
 
 // 0. 더미 데이터 (티켓 목록)
 const maintenanceData = [
     {
         id: 1,
+        buildingId: 1,
         date: '2025-12-22',
         room: '201호',
         category: '배관/누수',
@@ -17,6 +19,7 @@ const maintenanceData = [
     },
     {
         id: 2,
+        buildingId: 1,
         date: '2025-12-20',
         room: '101호',
         category: '전기/조명',
@@ -28,6 +31,7 @@ const maintenanceData = [
     },
     {
         id: 3,
+        buildingId: 2, // 두 번째 건물을 위한 데이터
         date: '2025-12-15',
         room: '302호',
         category: '가전옵션',
@@ -41,6 +45,11 @@ const maintenanceData = [
 
 export default function MaintenancePage() {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedBuildingId, setSelectedBuildingId] = useState<number | null>(null);
+    const { data: buildings = [] } = useBuildings();
+
+    const activeBuildingId = selectedBuildingId ?? buildings[0]?.id ?? null;
+    const filteredData = maintenanceData.filter(item => item.buildingId === activeBuildingId);
 
     // 우선순위 배지
     const getPriorityBadge = (priority: string) => {
@@ -66,16 +75,30 @@ export default function MaintenancePage() {
         <div className="p-4 md:p-8 space-y-6 bg-slate-50 min-h-screen relative">
 
             {/* 1. 헤더 & 등록 버튼 */}
-            <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-900">유지보수 / 민원</h1>
-                    <p className="text-slate-500 text-sm mt-1">세입자 요청사항과 수리 내역을 관리합니다.</p>
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-4 w-full md:w-auto">
+                    {/* 건물 선택 드롭다운 */}
+                    <select
+                        value={activeBuildingId ?? ''}
+                        onChange={e => setSelectedBuildingId(Number(e.target.value))}
+                        className="bg-white border border-slate-300 text-slate-700 py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium w-full md:w-auto"
+                    >
+                        {buildings.map(b => <option key={b.id} value={b.id}>🏢 {b.name}</option>)}
+                        {buildings.length === 0 && <option value="">건물 없음</option>}
+                    </select>
+
+                    <div className="hidden md:block w-px h-8 bg-slate-200"></div>
+
+                    <div>
+                        <h1 className="text-xl font-bold text-slate-900 md:text-2xl">유지보수 / 민원</h1>
+                        <p className="text-slate-500 text-sm mt-1">세입자 요청사항과 수리 내역을 건물별로 관리합니다.</p>
+                    </div>
                 </div>
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="bg-slate-900 hover:bg-black text-white px-5 py-3 rounded-xl font-bold shadow-lg shadow-slate-500/20 flex items-center justify-center gap-2"
+                    className="bg-slate-900 hover:bg-black text-white px-5 py-3 rounded-xl font-bold shadow-lg shadow-slate-500/20 flex items-center justify-center gap-2 whitespace-nowrap"
                 >
-                    <span>🛠️ 새 유지보수 기록</span>
+                    <span>🛠️ 새 민원 등록</span>
                 </button>
             </div>
 
@@ -99,44 +122,50 @@ export default function MaintenancePage() {
 
                 {/* [MOBILE] 카드형 리스트 (md:hidden) */}
                 <div className="block md:hidden space-y-4">
-                    {maintenanceData.map((item) => (
-                        <div
-                            key={item.id}
-                            className={`bg-white p-5 rounded-2xl shadow-sm border relative \${
-                item.priority === 'URGENT' && item.status !== 'DONE' ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200'
-              }`}
-                        >
-                            {/* 긴급일 때만 표시되는 상단 경고바 */}
-                            {item.priority === 'URGENT' && item.status !== 'DONE' && (
-                                <div className="absolute top-0 left-0 right-0 bg-red-500 h-1"></div>
-                            )}
-
-                            <div className="flex justify-between items-start mb-3">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-lg font-bold text-slate-800">{item.room}</span>
-                                    <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{item.category}</span>
-                                </div>
-                                {getPriorityBadge(item.priority)}
-                            </div>
-
-                            <p className="text-slate-700 text-sm mb-4 line-clamp-2 leading-relaxed">
-                                {item.description}
-                            </p>
-
-                            <div className="flex justify-between items-center pt-3 border-t border-slate-50">
-                                <div className="flex items-center gap-2">
-                                    {getStatusBadge(item.status)}
-                                    <span className="text-xs text-slate-300">|</span>
-                                    <span className="text-xs text-slate-400">{item.date}</span>
-                                </div>
-                                {item.status === 'DONE' ? (
-                                    <span className="text-slate-800 font-bold text-sm">비용: {item.cost.toLocaleString()}원</span>
-                                ) : (
-                                    <button className="text-blue-600 text-sm font-bold hover:underline">상세 / 처리 &rarr;</button>
-                                )}
-                            </div>
+                    {filteredData.length === 0 ? (
+                        <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center text-slate-400">
+                            해당 건물의 유지보수 기록이 없습니다.
                         </div>
-                    ))}
+                    ) : (
+                        filteredData.map((item) => (
+                            <div
+                                key={item.id}
+                                className={`bg-white p-5 rounded-2xl shadow-sm border relative \${
+                    item.priority === 'URGENT' && item.status !== 'DONE' ? 'border-red-500 ring-1 ring-red-500' : 'border-slate-200'
+                  }`}
+                            >
+                                {/* 긴급일 때만 표시되는 상단 경고바 */}
+                                {item.priority === 'URGENT' && item.status !== 'DONE' && (
+                                    <div className="absolute top-0 left-0 right-0 bg-red-500 h-1"></div>
+                                )}
+
+                                <div className="flex justify-between items-start mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-lg font-bold text-slate-800">{item.room}</span>
+                                        <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">{item.category}</span>
+                                    </div>
+                                    {getPriorityBadge(item.priority)}
+                                </div>
+
+                                <p className="text-slate-700 text-sm mb-4 line-clamp-2 leading-relaxed">
+                                    {item.description}
+                                </p>
+
+                                <div className="flex justify-between items-center pt-3 border-t border-slate-50">
+                                    <div className="flex items-center gap-2">
+                                        {getStatusBadge(item.status)}
+                                        <span className="text-xs text-slate-300">|</span>
+                                        <span className="text-xs text-slate-400">{item.date}</span>
+                                    </div>
+                                    {item.status === 'DONE' ? (
+                                        <span className="text-slate-800 font-bold text-sm">비용: {item.cost.toLocaleString()}원</span>
+                                    ) : (
+                                        <button className="text-blue-600 text-sm font-bold hover:underline">상세 / 처리 &rarr;</button>
+                                    )}
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
 
                 {/* [PC] 테이블형 리스트 (hidden md:block) */}
@@ -155,29 +184,35 @@ export default function MaintenancePage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100 text-sm text-slate-700">
-                            {maintenanceData.map((item) => (
-                                <tr key={item.id} className="hover:bg-slate-50 transition group">
-                                    <td className="p-4">{getPriorityBadge(item.priority)}</td>
-                                    <td className="p-4 text-slate-500">{item.date}</td>
-                                    <td className="p-4 font-bold text-slate-800">{item.room}</td>
-                                    <td className="p-4">
-                                        <span className="bg-slate-100 px-2 py-1 rounded text-xs text-slate-600">{item.category}</span>
-                                    </td>
-                                    <td className="p-4 max-w-md truncate group-hover:whitespace-normal group-hover:overflow-visible group-hover:bg-white group-hover:shadow-lg group-hover:z-10 relative">
-                                        {item.description}
-                                        {item.photos > 0 && <span className="ml-2 text-xs text-blue-500">📷 {item.photos}</span>}
-                                    </td>
-                                    <td className="p-4 text-center">{getStatusBadge(item.status)}</td>
-                                    <td className="p-4 text-right font-medium">
-                                        {item.cost > 0 ? `\${item.cost.toLocaleString()}원` : '-'}
-                                    </td>
-                                    <td className="p-4 text-center">
-                                        <button className="text-slate-400 hover:text-blue-600 border border-slate-200 hover:border-blue-400 px-3 py-1 rounded transition text-xs">
-                                            보기
-                                        </button>
-                                    </td>
+                            {filteredData.length === 0 ? (
+                                <tr>
+                                    <td colSpan={8} className="p-12 text-center text-slate-400">해당 건물의 유지보수 기록이 없습니다.</td>
                                 </tr>
-                            ))}
+                            ) : (
+                                filteredData.map((item) => (
+                                    <tr key={item.id} className="hover:bg-slate-50 transition group">
+                                        <td className="p-4">{getPriorityBadge(item.priority)}</td>
+                                        <td className="p-4 text-slate-500">{item.date}</td>
+                                        <td className="p-4 font-bold text-slate-800">{item.room}</td>
+                                        <td className="p-4">
+                                            <span className="bg-slate-100 px-2 py-1 rounded text-xs text-slate-600">{item.category}</span>
+                                        </td>
+                                        <td className="p-4 max-w-md truncate group-hover:whitespace-normal group-hover:overflow-visible group-hover:bg-white group-hover:shadow-lg group-hover:z-10 relative">
+                                            {item.description}
+                                            {item.photos > 0 && <span className="ml-2 text-xs text-blue-500">📷 {item.photos}</span>}
+                                        </td>
+                                        <td className="p-4 text-center">{getStatusBadge(item.status)}</td>
+                                        <td className="p-4 text-right font-medium">
+                                            {item.cost > 0 ? `\${item.cost.toLocaleString()}원` : '-'}
+                                        </td>
+                                        <td className="p-4 text-center">
+                                            <button className="text-slate-400 hover:text-blue-600 border border-slate-200 hover:border-blue-400 px-3 py-1 rounded transition text-xs">
+                                                보기
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>

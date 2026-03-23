@@ -9,6 +9,8 @@ interface ContractRepository : JpaRepository<Contract, Long> {
 
     fun findAllByBuildingId(buildingId: Long): List<Contract>
 
+    fun findAllByBuildingIdAndRoomNumber(buildingId: Long, roomNumber: String): List<Contract>
+
     // 현재 활성 계약 (Batch - 월세 자동 청구용)
     @Query("SELECT c FROM Contract c WHERE c.startDate <= :today AND c.endDate >= :today")
     fun findAllActiveContracts(today: LocalDate): List<Contract>
