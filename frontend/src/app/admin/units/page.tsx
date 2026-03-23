@@ -279,7 +279,7 @@ function ContractFormFields({
 // ─── 계약 등록 모달 ───────────────────────────────────────────────────────────
 function ContractModal({ room, buildingId, onClose }: { room: Room; buildingId: number; onClose: () => void }) {
     const today = new Date().toISOString().split('T')[0];
-    const oneYearLater = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const oneYearLater = (() => { const d = new Date(); d.setFullYear(d.getFullYear() + 1); return d.toISOString().split("T")[0]; })();
 
     const [form, setForm] = useState<ContractFormState>({
         contractType: 'MONTHLY_POST',
