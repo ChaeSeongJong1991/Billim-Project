@@ -45,4 +45,7 @@ interface PaymentRepository : JpaRepository<Payment, Long> {
           AND p.status IN ('UNPAID', 'PARTIAL')
     """)
     fun sumUnpaidAmountByUserEmail(email: String): Long
+
+    // 공유 토큰으로 납부 조회 (공개 청구서)
+    fun findByShareToken(shareToken: String): Payment?
 }

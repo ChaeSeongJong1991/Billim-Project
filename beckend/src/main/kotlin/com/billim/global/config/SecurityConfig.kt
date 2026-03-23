@@ -42,6 +42,7 @@ class SecurityConfig(
 
             .authorizeHttpRequests {
                 it.requestMatchers("/api/v1/auth/**").permitAll()
+                it.requestMatchers("/api/v1/payments/public/**").permitAll()
                 it.anyRequest().authenticated()
             }
             

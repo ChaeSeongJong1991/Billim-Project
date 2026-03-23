@@ -61,3 +61,23 @@ data class DashboardSummaryResponse(
     val unpaidCount: Long,
     val unpaidAmount: Long
 )
+
+data class ShareLinkResponse(
+    val paymentId: Long,
+    val shareToken: String,
+    val shareUrl: String
+)
+
+data class PublicPaymentResponse(
+    val id: Long,
+    val buildingName: String,
+    val roomNumber: String,
+    val tenantName: String,
+    val billingYear: Int,
+    val billingMonth: Int,
+    val billedAmount: Long,
+    val paidAmount: Long,
+    val status: PaymentStatus,
+    val paymentDate: LocalDate?,
+    val paymentMethod: String?
+)

@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useBuildings } from '@/hooks/useBuildings';
-import { useLedger, useCollectPayment, useCreatePayment, useDeletePayment, PaymentResponse, PaymentStatus } from '@/hooks/usePayments';
+import { useLedger, useCollectPayment, useCreatePayment, useDeletePayment, useSharePayment, PaymentResponse, PaymentStatus } from '@/hooks/usePayments';
 import { useContracts } from '@/hooks/useContracts';
 import { useRooms } from '@/hooks/useRooms';
 import { useModal } from '@/app/context/ModalContext';
@@ -172,6 +172,7 @@ export default function LedgerPage() {
     const activeBuildingId = selectedBuildingId ?? buildings[0]?.id ?? null;
     const { data: ledger, isFetching } = useLedger(activeBuildingId, year, month);
     const { mutate: deletePayment } = useDeletePayment(activeBuildingId ?? 0, year, month);
+    const { mutate: sharePayment, isPending: isSharing } = useSharePayment();
     const { showConfirm, showAlert } = useModal();
 
     const prevMonth = () => { if (month === 1) { setYear(y => y - 1); setMonth(12); } else setMonth(m => m - 1); };
@@ -182,6 +183,20 @@ export default function LedgerPage() {
         const matchUnpaid = !showUnpaidOnly || p.status !== 'PAID';
         return matchSearch && matchUnpaid;
     });
+
+    const handleShare = (payment: PaymentResponse) => {
+        sharePayment(payment.id, {
+            onSuccess: (data) => {
+                const invoiceUrl = `${window.location.origin}/invoice/${data.shareToken}`;
+                navigator.clipboard.writeText(invoiceUrl).then(() => {
+                    showAlert({ title: '링크 복사 완료', message: '청구서 링크가 클립보드에 복사되었습니다.\n임차인에게 공유하세요.', variant: 'SUCCESS' });
+                }).catch(() => {
+                    showAlert({ title: '공유 링크 생성 완료', message: invoiceUrl, variant: 'SUCCESS' });
+                });
+            },
+            onError: () => showAlert({ title: '오류', message: '공유 링크 생성에 실패했습니다.', variant: 'DANGER' }),
+        });
+    };
 
     const handleDelete = (payment: PaymentResponse) => {
         showConfirm({
@@ -318,18 +333,27 @@ export default function LedgerPage() {
                                     <div className="text-xs text-red-500 font-bold">⚠ {item.overdueDays}일 연체</div>
                                 )}
                             </div>
-                            <div className="pl-2">
-                                {item.status !== 'PAID' ? (
+                            <div className="pl-2 space-y-2">
+                                {item.status !== 'PAID' && (
                                     <button onClick={() => setCollectTarget(item)}
                                         className="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700">
                                         💳 수납 처리하기
                                     </button>
-                                ) : (
-                                    <button onClick={() => handleDelete(item)}
-                                        className="w-full bg-slate-100 text-slate-500 py-2 rounded-xl font-medium text-sm hover:bg-red-50 hover:text-red-500">
-                                        삭제
-                                    </button>
                                 )}
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => handleShare(item)}
+                                        disabled={isSharing}
+                                        className="flex-1 bg-slate-50 border border-slate-200 text-slate-600 py-2 rounded-xl font-medium text-sm hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition disabled:opacity-50">
+                                        🔗 청구서 공유
+                                    </button>
+                                    {item.status === 'PAID' && (
+                                        <button onClick={() => handleDelete(item)}
+                                            className="px-4 bg-slate-100 text-slate-500 py-2 rounded-xl font-medium text-sm hover:bg-red-50 hover:text-red-500">
+                                            삭제
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -385,17 +409,27 @@ export default function LedgerPage() {
                                         {item.memo && <div className="text-orange-500 mt-1">{item.memo}</div>}
                                     </td>
                                     <td className="p-5 text-center">
-                                        {item.status !== 'PAID' ? (
-                                            <button onClick={() => setCollectTarget(item)}
-                                                className="bg-blue-600 text-white px-4 py-1.5 rounded-lg font-bold text-xs hover:bg-blue-700 shadow-sm">
-                                                수납 처리
+                                        <div className="flex items-center justify-center gap-2">
+                                            {item.status !== 'PAID' && (
+                                                <button onClick={() => setCollectTarget(item)}
+                                                    className="bg-blue-600 text-white px-4 py-1.5 rounded-lg font-bold text-xs hover:bg-blue-700 shadow-sm">
+                                                    수납 처리
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => handleShare(item)}
+                                                disabled={isSharing}
+                                                title="청구서 공유 링크 복사"
+                                                className="text-slate-400 hover:text-blue-500 text-xs px-2 py-1 rounded hover:bg-blue-50 transition disabled:opacity-50">
+                                                🔗
                                             </button>
-                                        ) : (
-                                            <button onClick={() => handleDelete(item)}
-                                                className="text-slate-400 hover:text-red-500 underline text-xs">
-                                                삭제
-                                            </button>
-                                        )}
+                                            {item.status === 'PAID' && (
+                                                <button onClick={() => handleDelete(item)}
+                                                    className="text-slate-400 hover:text-red-500 underline text-xs">
+                                                    삭제
+                                                </button>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

@@ -111,6 +111,46 @@ class PaymentService(
         )
     }
 
+    // 공유 링크 생성 (토큰 발급)
+    @Transactional
+    fun generateShareLink(email: String, paymentId: Long, baseUrl: String): ShareLinkResponse {
+        val payment = paymentRepository.findById(paymentId)
+            .orElseThrow { EntityNotFoundException(paymentId, "수납 기록을 찾을 수 없습니다.") }
+
+        if (payment.contract.building.user.email != email) {
+            throw IllegalStateException("본인 소유 건물의 수납만 공유할 수 있습니다.")
+        }
+
+        payment.generateShareToken()
+        logger.info("공유 링크 생성: paymentId={}, token={}", paymentId, payment.shareToken)
+
+        return ShareLinkResponse(
+            paymentId = payment.id!!,
+            shareToken = payment.shareToken!!,
+            shareUrl = "$baseUrl/invoice/${payment.shareToken}"
+        )
+    }
+
+    // 공개 청구서 조회 (인증 불필요)
+    fun getPublicPayment(token: String): PublicPaymentResponse {
+        val payment = paymentRepository.findByShareToken(token)
+            ?: throw EntityNotFoundException(0, "유효하지 않은 공유 링크입니다.")
+
+        return PublicPaymentResponse(
+            id = payment.id!!,
+            buildingName = payment.contract.building.name,
+            roomNumber = payment.contract.roomNumber,
+            tenantName = payment.contract.tenantName,
+            billingYear = payment.billingYear,
+            billingMonth = payment.billingMonth,
+            billedAmount = payment.billedAmount,
+            paidAmount = payment.paidAmount,
+            status = payment.status,
+            paymentDate = payment.paymentDate,
+            paymentMethod = payment.paymentMethod
+        )
+    }
+
     private fun Payment.toResponse(): PaymentResponse {
         val today = LocalDate.now()
         val rentDay = this.contract.rentDay

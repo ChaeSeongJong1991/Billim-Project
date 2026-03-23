@@ -41,10 +41,19 @@ class Payment(
     @Column(columnDefinition = "TEXT")
     var memo: String? = null,
 
+    @Column(name = "share_token", unique = true, nullable = true, length = 36)
+    var shareToken: String? = null,
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null
 ) : BaseEntity() {
+
+    fun generateShareToken() {
+        if (this.shareToken == null) {
+            this.shareToken = java.util.UUID.randomUUID().toString()
+        }
+    }
 
     fun collect(paidAmount: Long, paymentMethod: String?, memo: String?) {
         this.paidAmount = paidAmount

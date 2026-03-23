@@ -46,6 +46,26 @@ export interface PaymentCollectRequest {
     memo?: string;
 }
 
+export interface ShareLinkResponse {
+    paymentId: number;
+    shareToken: string;
+    shareUrl: string;
+}
+
+export interface PublicPaymentResponse {
+    id: number;
+    buildingName: string;
+    roomNumber: string;
+    tenantName: string;
+    billingYear: number;
+    billingMonth: number;
+    billedAmount: number;
+    paidAmount: number;
+    status: PaymentStatus;
+    paymentDate: string | null;
+    paymentMethod: string | null;
+}
+
 // 월별 장부 조회
 export function useLedger(buildingId: number | null, year: number, month: number) {
     return useQuery({
@@ -99,5 +119,29 @@ export function useDeletePayment(buildingId: number, year: number, month: number
     return useMutation({
         mutationFn: (paymentId: number) => api.delete(`/payments/${paymentId}`),
         onSuccess: () => queryClient.invalidateQueries({ queryKey: ['ledger', buildingId, year, month] }),
+    });
+}
+
+// 공유 링크 생성
+export function useSharePayment() {
+    return useMutation({
+        mutationFn: async (paymentId: number): Promise<ShareLinkResponse> => {
+            const { data } = await api.post(`/payments/${paymentId}/share`);
+            return data;
+        },
+    });
+}
+
+// 공개 청구서 조회 (인증 불필요 — publicApi 사용)
+import publicApi from '@/lib/axiosPublic';
+
+export function usePublicPayment(token: string) {
+    return useQuery({
+        queryKey: ['public-payment', token],
+        queryFn: async (): Promise<PublicPaymentResponse> => {
+            const { data } = await publicApi.get(`/payments/public/${token}`);
+            return data;
+        },
+        enabled: !!token,
     });
 }

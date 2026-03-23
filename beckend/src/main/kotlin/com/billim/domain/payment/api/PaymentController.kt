@@ -2,6 +2,7 @@ package com.billim.domain.payment.api
 
 import com.billim.domain.payment.api.dto.*
 import com.billim.domain.payment.application.PaymentService
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -65,5 +66,26 @@ class PaymentController(
     ): ResponseEntity<Unit> {
         paymentService.delete(userDetails.username, paymentId)
         return ResponseEntity.noContent().build()
+    }
+
+    // 공유 링크 생성
+    @PostMapping("/{paymentId}/share")
+    fun generateShareLink(
+        @AuthenticationPrincipal userDetails: UserDetails,
+        @PathVariable paymentId: Long,
+        request: HttpServletRequest
+    ): ResponseEntity<ShareLinkResponse> {
+        val baseUrl = "${request.scheme}://${request.serverName}:${request.serverPort}"
+        val result = paymentService.generateShareLink(userDetails.username, paymentId, baseUrl)
+        return ResponseEntity.ok(result)
+    }
+
+    // 공개 청구서 조회 (인증 불필요)
+    @GetMapping("/public/{token}")
+    fun getPublicPayment(
+        @PathVariable token: String
+    ): ResponseEntity<PublicPaymentResponse> {
+        val result = paymentService.getPublicPayment(token)
+        return ResponseEntity.ok(result)
     }
 }
