@@ -1,6 +1,7 @@
 package com.billim.domain.contract.api.dto
 
 import com.billim.domain.contract.domain.ContractType
+import com.billim.domain.contract.domain.RenewalStatus
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
@@ -93,6 +94,7 @@ data class ContractUpdateRequest(
 
 data class ContractResponse(
     val id: Long,
+    val buildingId: Long,
     val buildingName: String,
     val roomNumber: String,
     val contractType: ContractType,
@@ -105,5 +107,41 @@ data class ContractResponse(
     val startDate: LocalDate,
     val endDate: LocalDate,
     val householdCount: Int,
-    val memo: String?
+    val memo: String?,
+    val renewalStatus: RenewalStatus = RenewalStatus.ACTIVE,
+    val parentContractId: Long? = null
+)
+
+data class ExpiringContractResponse(
+    val id: Long,
+    val buildingId: Long,
+    val buildingName: String,
+    val roomNumber: String,
+    val tenantName: String,
+    val tenantPhone: String,
+    val monthlyRent: Long,
+    val deposit: Long,
+    val startDate: LocalDate,
+    val endDate: LocalDate,
+    val daysLeft: Long,
+    val contractType: ContractType,
+    val renewalStatus: RenewalStatus
+)
+
+enum class RenewType { KEEP, MODIFY }
+
+data class ContractRenewRequest(
+    @field:NotNull(message = "갱신 유형은 필수입니다.")
+    val renewType: RenewType,
+
+    @field:NotNull(message = "새 종료일은 필수입니다.")
+    val newEndDate: LocalDate,
+
+    // MODIFY 시 변경 가능한 항목들 (null이면 기존 값 유지)
+    val newStartDate: LocalDate? = null,
+    @field:Min(0) val monthlyRent: Long? = null,
+    @field:Min(0) val deposit: Long? = null,
+    @field:Min(0) val maintenanceFee: Long? = null,
+    @field:Min(1) @field:Max(31) val rentDay: Int? = null,
+    val memo: String? = null
 )

@@ -96,6 +96,48 @@ frontend/src/
 - **상태**: Zustand store는 `store/use{Name}Store.ts`
 - **스타일**: Tailwind CSS 유틸리티 클래스 사용, cn() 헬퍼로 조건부 클래스
 
+## gstack
+
+Use the `/browse` skill from gstack for **all web browsing**. Never use `mcp__claude-in-chrome__*` tools.
+
+### Available gstack skills
+
+| Skill | Purpose |
+|-------|---------|
+| `/browse` | Headless browser — navigate URLs, interact with elements, verify UI |
+| `/qa` | Systematically QA test a web app and fix bugs found |
+| `/qa-only` | Report-only QA — produces structured report without fixing |
+| `/review` | Pre-landing PR review (SQL safety, LLM trust boundary, diffs) |
+| `/ship` | Ship workflow — merge base, run tests, bump VERSION, update CHANGELOG |
+| `/land-and-deploy` | Merge PR, wait for CI/deploy, verify production health |
+| `/canary` | Post-deploy canary monitoring for errors and regressions |
+| `/benchmark` | Performance regression detection — baselines for load times |
+| `/setup-deploy` | Configure deployment settings for `/land-and-deploy` |
+| `/setup-browser-cookies` | Import cookies from real browser into headless session |
+| `/investigate` | Systematic debugging with root cause investigation |
+| `/autoplan` | Auto-review pipeline — CEO, design, and eng review |
+| `/plan-ceo-review` | CEO/founder-mode plan review |
+| `/plan-design-review` | Designer's eye plan review |
+| `/plan-eng-review` | Eng manager-mode plan review |
+| `/design-consultation` | Research landscape and propose complete design system |
+| `/design-review` | Visual QA — find inconsistency, spacing, hierarchy issues |
+| `/document-release` | Post-ship documentation update |
+| `/retro` | Weekly engineering retrospective |
+| `/office-hours` | YC Office Hours — startup or product mode |
+| `/cso` | Chief Security Officer — OWASP audit, STRIDE threat modeling |
+| `/careful` | Safety guardrails for destructive commands |
+| `/guard` | Full safety mode — destructive warnings + directory-scoped edits |
+| `/freeze` | Restrict file edits to a specific directory |
+| `/unfreeze` | Clear the freeze boundary |
+| `/codex` | OpenAI Codex CLI wrapper — code review, diff review |
+| `/gstack-upgrade` | Upgrade gstack to the latest version |
+
+## Design System
+Always read DESIGN.md before making any visual or UI decisions.
+All font choices, colors, spacing, and aesthetic direction are defined there.
+Do not deviate without explicit user approval.
+In QA mode, flag any code that doesn't match DESIGN.md.
+
 ## 주의사항
 - `beckend/` 디렉토리명 오타 (backend → beckend) 이미 확정된 상태, 변경하지 말 것
 - `.env` 파일과 `serviceAccountKey.json`은 절대 커밋하지 말 것

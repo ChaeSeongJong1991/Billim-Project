@@ -1,6 +1,7 @@
 package com.billim.batch.tasklet
 
 import com.billim.domain.contract.domain.Contract
+import com.billim.domain.contract.domain.RenewalStatus
 import com.billim.domain.contract.infra.ContractRepository
 import org.slf4j.LoggerFactory
 import org.springframework.batch.core.StepContribution
@@ -35,7 +36,7 @@ class ContractExpiryTasklet(
 
         log.info("[ContractExpiry] START - 만료 임박 계약 확인 (기준일: $today ~ $limitDate)")
 
-        val expiringContracts = contractRepository.findExpiringContracts(today, limitDate)
+        val expiringContracts = contractRepository.findExpiringContracts(today, limitDate, RenewalStatus.ACTIVE)
 
         if (expiringContracts.isEmpty()) {
             log.info("[ContractExpiry] 만료 임박 계약 없음")

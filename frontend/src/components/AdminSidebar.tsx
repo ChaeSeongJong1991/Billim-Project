@@ -3,19 +3,22 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useBuildings } from "@/hooks/useBuildings";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useExpiringContracts } from "@/hooks/useContracts";
 
 interface NavItem {
   href: string;
   icon: string;
   label: string;
   requiresBuilding?: boolean;
+  badgeKey?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { href: "/admin/dashboard", icon: "📊", label: "대시보드" },
-  { href: "/admin/units",     icon: "🏢", label: "내 건물 관리", requiresBuilding: true },
-  { href: "/admin/ledger",    icon: "💰", label: "수납 장부",    requiresBuilding: true },
-  { href: "/admin/maintenance", icon: "🛠", label: "유지보수",  requiresBuilding: true },
+  { href: "/admin/dashboard",   icon: "📊", label: "대시보드" },
+  { href: "/admin/units",       icon: "🏢", label: "내 건물 관리",  requiresBuilding: true },
+  { href: "/admin/ledger",      icon: "💰", label: "수납 장부",     requiresBuilding: true },
+  { href: "/admin/renewals",    icon: "🔄", label: "계약 갱신",     requiresBuilding: true, badgeKey: "expiring" },
+  { href: "/admin/maintenance", icon: "🛠", label: "유지보수",      requiresBuilding: true },
 ];
 
 export default function AdminSidebar() {
@@ -23,8 +26,12 @@ export default function AdminSidebar() {
   const router = useRouter();
   const logout = useAuthStore((state) => state.logout);
   const { data: buildings = [] } = useBuildings();
+  const { data: expiringContracts = [] } = useExpiringContracts(30);
 
   const hasBuildings = buildings.length > 0;
+  const badges: Record<string, number> = {
+    expiring: expiringContracts.length,
+  };
 
   const handleLogout = () => {
     logout();
@@ -40,9 +47,10 @@ export default function AdminSidebar() {
 
       {/* 메뉴 */}
       <nav className="flex-1 px-4 py-6 space-y-2">
-        {NAV_ITEMS.map(({ href, icon, label, requiresBuilding }) => {
+        {NAV_ITEMS.map(({ href, icon, label, requiresBuilding, badgeKey }) => {
           const isDisabled = requiresBuilding && !hasBuildings;
           const isActive = pathname.startsWith(href);
+          const badgeCount = badgeKey ? badges[badgeKey] ?? 0 : 0;
 
           if (isDisabled) {
             return (
@@ -70,6 +78,11 @@ export default function AdminSidebar() {
             >
               <span>{icon}</span>
               <span>{label}</span>
+              {badgeCount > 0 && (
+                <span className="ml-auto text-xs bg-amber-500 text-white font-semibold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                  {badgeCount}
+                </span>
+              )}
             </a>
           );
         })}

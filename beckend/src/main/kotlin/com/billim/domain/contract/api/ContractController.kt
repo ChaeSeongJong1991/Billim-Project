@@ -1,8 +1,10 @@
 package com.billim.domain.contract.api
 
 import com.billim.domain.contract.api.dto.ContractCreateRequest
+import com.billim.domain.contract.api.dto.ContractRenewRequest
 import com.billim.domain.contract.api.dto.ContractResponse
 import com.billim.domain.contract.api.dto.ContractUpdateRequest
+import com.billim.domain.contract.api.dto.ExpiringContractResponse
 import com.billim.domain.contract.application.ContractService
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -52,6 +54,34 @@ class ContractController(
         @Valid @RequestBody request: ContractUpdateRequest
     ): ResponseEntity<Unit> {
         contractService.update(userDetails.username, contractId, request)
+        return ResponseEntity.ok().build()
+    }
+
+    @GetMapping("/expiring")
+    fun getExpiring(
+        @AuthenticationPrincipal userDetails: UserDetails,
+        @RequestParam(defaultValue = "30") days: Long
+    ): ResponseEntity<List<ExpiringContractResponse>> {
+        val contracts = contractService.getExpiringContracts(userDetails.username, days)
+        return ResponseEntity.ok(contracts)
+    }
+
+    @PostMapping("/{contractId}/renew")
+    fun renew(
+        @AuthenticationPrincipal userDetails: UserDetails,
+        @PathVariable contractId: Long,
+        @Valid @RequestBody request: ContractRenewRequest
+    ): ResponseEntity<Long> {
+        val newContractId = contractService.renew(userDetails.username, contractId, request)
+        return ResponseEntity.status(HttpStatus.CREATED).body(newContractId)
+    }
+
+    @PatchMapping("/{contractId}/terminate")
+    fun terminate(
+        @AuthenticationPrincipal userDetails: UserDetails,
+        @PathVariable contractId: Long
+    ): ResponseEntity<Unit> {
+        contractService.terminate(userDetails.username, contractId)
         return ResponseEntity.ok().build()
     }
 }
