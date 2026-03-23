@@ -132,6 +132,39 @@ export function useSharePayment() {
     });
 }
 
+export interface MonthlyRevenueItem {
+    year: number;
+    month: number;
+    totalBilled: number;
+    totalPaid: number;
+    collectionRate: number;
+    unpaidAmount: number;
+    paymentCount: number;
+}
+
+export interface MonthlyReportResponse {
+    buildingId: number;
+    buildingName: string;
+    months: MonthlyRevenueItem[];
+    totalBilled: number;
+    totalPaid: number;
+    avgCollectionRate: number;
+}
+
+// 월별 수익 리포트
+export function useMonthlyReport(buildingId: number | null, months: number = 12) {
+    return useQuery({
+        queryKey: ['monthly-report', buildingId, months],
+        queryFn: async (): Promise<MonthlyReportResponse> => {
+            const { data } = await api.get('/payments/monthly-report', {
+                params: { buildingId, months }
+            });
+            return data;
+        },
+        enabled: buildingId !== null,
+    });
+}
+
 // 공개 청구서 조회 (인증 불필요 — publicApi 사용)
 import publicApi from '@/lib/axiosPublic';
 

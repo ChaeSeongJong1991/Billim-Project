@@ -19,6 +19,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/admin/ledger",      icon: "💰", label: "수납 장부",     requiresBuilding: true },
   { href: "/admin/renewals",    icon: "🔄", label: "계약 갱신",     requiresBuilding: true, badgeKey: "expiring" },
   { href: "/admin/maintenance", icon: "🛠", label: "유지보수",      requiresBuilding: true },
+  { href: "/admin/reports",     icon: "📈", label: "수익 리포트",   requiresBuilding: true },
 ];
 
 export default function AdminSidebar() {

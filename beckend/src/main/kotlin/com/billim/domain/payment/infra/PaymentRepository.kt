@@ -48,4 +48,16 @@ interface PaymentRepository : JpaRepository<Payment, Long> {
 
     // 공유 토큰으로 납부 조회 (공개 청구서)
     fun findByShareToken(shareToken: String): Payment?
+
+    // 건물별 연월 집계 (월별 리포트용)
+    @Query("""
+        SELECT p FROM Payment p
+        JOIN FETCH p.contract c
+        JOIN FETCH c.building b
+        WHERE b.id = :buildingId
+          AND (p.billingYear > :fromYear
+               OR (p.billingYear = :fromYear AND p.billingMonth >= :fromMonth))
+        ORDER BY p.billingYear ASC, p.billingMonth ASC
+    """)
+    fun findByBuildingFromYearMonth(buildingId: Long, fromYear: Int, fromMonth: Int): List<Payment>
 }

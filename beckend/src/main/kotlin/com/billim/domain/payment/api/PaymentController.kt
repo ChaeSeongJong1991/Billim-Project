@@ -88,4 +88,15 @@ class PaymentController(
         val result = paymentService.getPublicPayment(token)
         return ResponseEntity.ok(result)
     }
+
+    // 월별 수익 리포트
+    @GetMapping("/monthly-report")
+    fun getMonthlyReport(
+        @AuthenticationPrincipal userDetails: UserDetails,
+        @RequestParam buildingId: Long,
+        @RequestParam(defaultValue = "12") months: Int
+    ): ResponseEntity<MonthlyReportResponse> {
+        val report = paymentService.getMonthlyReport(userDetails.username, buildingId, months)
+        return ResponseEntity.ok(report)
+    }
 }

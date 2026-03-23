@@ -131,6 +131,61 @@ class PaymentService(
         )
     }
 
+    // 월별 수익 리포트
+    fun getMonthlyReport(email: String, buildingId: Long, months: Int = 12): MonthlyReportResponse {
+        val building = buildingRepository.findById(buildingId)
+            .orElseThrow { EntityNotFoundException(buildingId, "건물을 찾을 수 없습니다.") }
+        if (building.user.email != email) {
+            throw IllegalStateException("본인 소유 건물만 조회할 수 있습니다.")
+        }
+
+        // N개월 전 시작점 계산
+        val now = LocalDate.now()
+        val start = now.minusMonths(months.toLong() - 1).withDayOfMonth(1)
+
+        val payments = paymentRepository.findByBuildingFromYearMonth(
+            buildingId, start.year, start.monthValue
+        )
+
+        // (year, month) 기준으로 그룹핑
+        val grouped = payments.groupBy { it.billingYear to it.billingMonth }
+
+        // start ~ now 구간의 모든 월을 순서대로 생성 (데이터 없는 달도 포함)
+        val items = mutableListOf<MonthlyRevenueItem>()
+        var cursor = start
+        val end = now.withDayOfMonth(1)
+        while (!cursor.isAfter(end)) {
+            val key = cursor.year to cursor.monthValue
+            val monthPayments = grouped[key] ?: emptyList()
+            val billed = monthPayments.sumOf { it.billedAmount }
+            val paid = monthPayments.sumOf { it.paidAmount }
+            val rate = if (billed > 0) ((paid.toDouble() / billed) * 100).toInt() else 0
+            items.add(MonthlyRevenueItem(
+                year = cursor.year,
+                month = cursor.monthValue,
+                totalBilled = billed,
+                totalPaid = paid,
+                collectionRate = rate,
+                unpaidAmount = maxOf(0, billed - paid),
+                paymentCount = monthPayments.size
+            ))
+            cursor = cursor.plusMonths(1)
+        }
+
+        val totalBilled = items.sumOf { it.totalBilled }
+        val totalPaid = items.sumOf { it.totalPaid }
+        val avgRate = if (totalBilled > 0) ((totalPaid.toDouble() / totalBilled) * 100).toInt() else 0
+
+        return MonthlyReportResponse(
+            buildingId = buildingId,
+            buildingName = building.name,
+            months = items,
+            totalBilled = totalBilled,
+            totalPaid = totalPaid,
+            avgCollectionRate = avgRate
+        )
+    }
+
     // 공개 청구서 조회 (인증 불필요)
     fun getPublicPayment(token: String): PublicPaymentResponse {
         val payment = paymentRepository.findByShareToken(token)

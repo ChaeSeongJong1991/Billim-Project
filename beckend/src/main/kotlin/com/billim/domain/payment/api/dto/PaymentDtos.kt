@@ -68,6 +68,25 @@ data class ShareLinkResponse(
     val shareUrl: String
 )
 
+data class MonthlyRevenueItem(
+    val year: Int,
+    val month: Int,
+    val totalBilled: Long,
+    val totalPaid: Long,
+    val collectionRate: Int,  // 징수율 (%)
+    val unpaidAmount: Long,
+    val paymentCount: Int     // 청구서 건수
+)
+
+data class MonthlyReportResponse(
+    val buildingId: Long,
+    val buildingName: String,
+    val months: List<MonthlyRevenueItem>,
+    val totalBilled: Long,      // 기간 합계
+    val totalPaid: Long,
+    val avgCollectionRate: Int  // 평균 징수율
+)
+
 data class PublicPaymentResponse(
     val id: Long,
     val buildingName: String,
