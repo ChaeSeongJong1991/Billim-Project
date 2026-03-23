@@ -13,8 +13,8 @@ serviceAccountKey.json
 application-*.properties
 
 # Build outputs
-beckend/build/
-beckend/.gradle/
+backend/build/
+backend/.gradle/
 frontend/.next/
 frontend/out/
 
@@ -40,7 +40,7 @@ coverage/
 .nyc_output/
 
 # Docker volumes
-beckend/data/
+backend/data/
 
 # Git
 .git/

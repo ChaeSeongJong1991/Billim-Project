@@ -5,7 +5,7 @@
 
 ## 기술 스택
 
-### Backend (`beckend/`)
+### Backend (`backend/`)
 - **Language**: Kotlin 1.9 (JDK 21)
 - **Framework**: Spring Boot 3.4.0
 - **ORM**: Spring Data JPA
@@ -28,10 +28,10 @@
 
 ```bash
 # 인프라 (MySQL + Redis)
-cd beckend && docker-compose up -d
+cd backend && docker-compose up -d
 
 # Backend
-cd beckend && ./gradlew bootRun
+cd backend && ./gradlew bootRun
 
 # Frontend
 cd frontend && npm install && npm run dev
@@ -41,7 +41,7 @@ cd frontend && npm install && npm run dev
 
 ```bash
 # Backend
-cd beckend && ./gradlew test
+cd backend && ./gradlew test
 
 # Frontend
 cd frontend && npm run lint
@@ -50,7 +50,7 @@ cd frontend && npm run lint
 ## 디렉토리 구조
 
 ```
-beckend/src/main/kotlin/com/billim/
+backend/src/main/kotlin/com/billim/
 ├── BillimApplication.kt
 ├── batch/                    # Spring Batch (스케줄러 + Tasklet)
 │   ├── BatchScheduler.kt
@@ -139,6 +139,5 @@ Do not deviate without explicit user approval.
 In QA mode, flag any code that doesn't match DESIGN.md.
 
 ## 주의사항
-- `beckend/` 디렉토리명 오타 (backend → beckend) 이미 확정된 상태, 변경하지 말 것
 - `.env` 파일과 `serviceAccountKey.json`은 절대 커밋하지 말 것
-- `beckend/data/` 는 Docker volume 데이터로 gitignore 대상
+- `backend/data/` 는 Docker volume 데이터로 gitignore 대상

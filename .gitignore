@@ -16,3 +16,6 @@ build/
 **/.next/
 
 .gstack/
+
+# Docker volumes
+backend/data/

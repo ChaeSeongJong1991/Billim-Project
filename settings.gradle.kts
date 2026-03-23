@@ -1,2 +1,2 @@
 rootProject.name = "Billim-Project"
-include("beckend")
+include("backend")
