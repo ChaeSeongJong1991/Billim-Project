@@ -1,6 +1,8 @@
 package com.billim.domain.contract.application
 
+import com.billim.domain.building.domain.RoomStatus
 import com.billim.domain.building.infra.BuildingRepository
+import com.billim.domain.building.infra.RoomRepository
 import com.billim.domain.contract.api.dto.ContractCreateRequest
 import com.billim.domain.contract.api.dto.ContractRenewRequest
 import com.billim.domain.contract.api.dto.ContractResponse
@@ -23,6 +25,7 @@ import java.time.temporal.ChronoUnit
 class ContractService(
     private val contractRepository: ContractRepository,
     private val buildingRepository: BuildingRepository,
+    private val roomRepository: RoomRepository,
     private val userRepository: UserRepository
 ) {
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -52,7 +55,13 @@ class ContractService(
             householdCount = request.householdCount,
             memo = request.memo
         )
-        return contractRepository.save(contract).id!!
+        val saved = contractRepository.save(contract)
+
+        roomRepository.findByBuildingIdAndRoomNumber(building.id!!, request.roomNumber)
+            ?.updateStatus(RoomStatus.OCCUPIED)
+            ?: logger.warn("호실을 찾을 수 없어 상태 변경 생략: buildingId={}, roomNumber={}", building.id, request.roomNumber)
+
+        return saved.id!!
     }
 
     fun getContractsByBuilding(email: String, buildingId: Long): List<ContractResponse> {
@@ -174,6 +183,10 @@ class ContractService(
         }
         contract.terminate()
         logger.info("계약 종료 처리: contractId={}", contractId)
+
+        roomRepository.findByBuildingIdAndRoomNumber(contract.building.id!!, contract.roomNumber)
+            ?.updateStatus(RoomStatus.VACANT)
+            ?: logger.warn("호실을 찾을 수 없어 상태 변경 생략: buildingId={}, roomNumber={}", contract.building.id, contract.roomNumber)
     }
 
     private fun Contract.toResponse() = ContractResponse(

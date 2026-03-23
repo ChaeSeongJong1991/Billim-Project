@@ -2,6 +2,8 @@ package com.billim.domain.dashboard.api
 
 import com.billim.domain.common.api.dto.AdminDashboardResponse
 import com.billim.domain.common.api.dto.TenantDashboardResponse
+import com.billim.domain.dashboard.api.dto.LandlordDashboardResponse
+import com.billim.domain.dashboard.application.LandlordDashboardService
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.core.userdetails.UserDetails
@@ -11,7 +13,35 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v1/dashboard")
-class DashboardController {
+class DashboardController(
+    private val landlordDashboardService: LandlordDashboardService
+) {
+
+    /**
+     * GET /api/v1/dashboard/landlord
+     * 임대인(관리자) 대시보드 - 호실 현황, 계약 만료, 미납 요약
+     */
+    @GetMapping("/landlord")
+    fun getLandlordDashboard(
+        @AuthenticationPrincipal userDetails: UserDetails
+    ): ResponseEntity<LandlordDashboardResponse> {
+        val response = landlordDashboardService.getDashboard(userDetails.username)
+        return ResponseEntity.ok(response)
+    }
+
+    /**
+     * GET /api/v1/dashboard/calendar
+     * 캘린더 대시보드 데이터 조회
+     */
+    @GetMapping("/calendar")
+    fun getDashboardCalendar(
+        @org.springframework.web.bind.annotation.RequestParam year: Int,
+        @org.springframework.web.bind.annotation.RequestParam month: Int,
+        @AuthenticationPrincipal userDetails: UserDetails
+    ): ResponseEntity<com.billim.domain.dashboard.api.dto.DashboardCalendarResponse> {
+        val response = landlordDashboardService.getCalendarData(userDetails.username, year, month)
+        return ResponseEntity.ok(response)
+    }
 
     /**
      * GET /api/v1/dashboard/tenant

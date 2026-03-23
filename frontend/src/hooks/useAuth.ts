@@ -45,7 +45,7 @@ export function useAuth() {
     onSuccess: (data) => {
       if (data.data?.user) {
         // 토큰은 HttpOnly 쿠키에 자동 저장됨
-        login(data.data.user)
+        login(data.data.user, '')
       }
     },
     onError: (error) => {
@@ -61,7 +61,7 @@ export function useAuth() {
     onSuccess: (data) => {
       if (data.data?.user) {
         // 토큰은 HttpOnly 쿠키에 자동 저장됨
-        login(data.data.user)
+        login(data.data.user, '')
       }
     },
     onError: (error) => {

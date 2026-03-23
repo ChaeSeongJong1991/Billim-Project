@@ -18,6 +18,16 @@ interface PaymentRepository : JpaRepository<Payment, Long> {
     """)
     fun findByBuildingAndYearMonth(buildingId: Long, year: Int, month: Int): List<Payment>
 
+    @Query("""
+        SELECT p FROM Payment p
+        JOIN FETCH p.contract c
+        JOIN FETCH c.building b
+        WHERE b.user.email = :email
+          AND p.billingYear = :year
+          AND p.billingMonth = :month
+    """)
+    fun findByUserEmailAndYearMonth(email: String, year: Int, month: Int): List<Payment>
+
     // 계약별 수납 이력
     fun findAllByContractIdOrderByBillingYearDescBillingMonthDesc(contractId: Long): List<Payment>
 
@@ -38,7 +48,7 @@ interface PaymentRepository : JpaRepository<Payment, Long> {
 
     // 미납 총액 집계 (대시보드용)
     @Query("""
-        SELECT COALESCE(SUM(p.billedAmount - p.paidAmount), 0) FROM Payment p
+        SELECT COALESCE(SUM(p.billedAmount + p.utilityAmount - p.paidAmount), 0) FROM Payment p
         JOIN p.contract c
         JOIN c.building b
         WHERE b.user.email = :email
@@ -60,4 +70,16 @@ interface PaymentRepository : JpaRepository<Payment, Long> {
         ORDER BY p.billingYear ASC, p.billingMonth ASC
     """)
     fun findByBuildingFromYearMonth(buildingId: Long, fromYear: Int, fromMonth: Int): List<Payment>
+
+    @Query("""
+        SELECT p.billingMonth as month, SUM(p.paidAmount) as amount 
+        FROM Payment p
+        JOIN p.contract c
+        JOIN c.building b
+        WHERE b.user.email = :email
+          AND p.billingYear = :year
+          AND p.paidAmount > 0
+        GROUP BY p.billingMonth
+    """)
+    fun findMonthlyRevenueByUserEmailAndYear(email: String, year: Int): List<Array<Any>>
 }

@@ -20,4 +20,12 @@ interface ContractRepository : JpaRepository<Contract, Long> {
     // JOIN FETCH b.user: getExpiringContracts()에서 building.user.id 접근 시 N+1 방지
     @Query("SELECT c FROM Contract c JOIN FETCH c.building b JOIN FETCH b.user WHERE c.endDate BETWEEN :today AND :limitDate AND c.renewalStatus = :status")
     fun findExpiringContracts(today: LocalDate, limitDate: LocalDate, status: RenewalStatus = RenewalStatus.ACTIVE): List<Contract>
+
+    // 오늘 기준으로 이미 만료된 ACTIVE 계약 (Batch - 실제 만료 처리용)
+    @Query("SELECT c FROM Contract c JOIN FETCH c.building WHERE c.endDate < :today AND c.renewalStatus = :status")
+    fun findExpiredContracts(today: LocalDate, status: RenewalStatus = RenewalStatus.ACTIVE): List<Contract>
+
+    // 임대인별 30일 내 만료 예정 계약 수 (대시보드용)
+    @Query("SELECT COUNT(c) FROM Contract c WHERE c.building.user.email = :email AND c.endDate BETWEEN :today AND :limitDate AND c.renewalStatus = :status")
+    fun countExpiringByUserEmail(email: String, today: LocalDate, limitDate: LocalDate, status: RenewalStatus = RenewalStatus.ACTIVE): Long
 }

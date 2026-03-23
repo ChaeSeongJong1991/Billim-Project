@@ -8,6 +8,7 @@ import {
   useRenewContract,
   useTerminateContract,
 } from "@/hooks/useContracts";
+import { formatMoneyInput, parseMoneyInput } from "@/lib/utils";
 
 interface RenewalModalProps {
   contract: ExpiringContractResponse;
@@ -36,6 +37,8 @@ export default function RenewalModal({ contract, onClose }: RenewalModalProps) {
   );
   const [monthlyRent, setMonthlyRent] = useState(contract.monthlyRent);
   const [deposit, setDeposit] = useState(contract.deposit);
+  const [displayMonthlyRent, setDisplayMonthlyRent] = useState(formatMoneyInput(contract.monthlyRent));
+  const [displayDeposit, setDisplayDeposit] = useState(formatMoneyInput(contract.deposit));
   const [memo, setMemo] = useState("");
   const [error, setError] = useState<string | null>(null);
 
@@ -221,18 +224,28 @@ export default function RenewalModal({ contract, onClose }: RenewalModalProps) {
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">월세 (원)</label>
                   <input
-                    type="number"
-                    value={monthlyRent}
-                    onChange={(e) => setMonthlyRent(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={displayMonthlyRent}
+                    onChange={(e) => {
+                      const formatted = formatMoneyInput(e.target.value);
+                      setDisplayMonthlyRent(formatted);
+                      setMonthlyRent(parseMoneyInput(formatted));
+                    }}
                     className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-zinc-700 mb-1">보증금 (원)</label>
                   <input
-                    type="number"
-                    value={deposit}
-                    onChange={(e) => setDeposit(Number(e.target.value))}
+                    type="text"
+                    inputMode="numeric"
+                    value={displayDeposit}
+                    onChange={(e) => {
+                      const formatted = formatMoneyInput(e.target.value);
+                      setDisplayDeposit(formatted);
+                      setDeposit(parseMoneyInput(formatted));
+                    }}
                     className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>

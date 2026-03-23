@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
+import { formatMoneyInput, parseMoneyInput } from '@/lib/utils';
 import { useBuildings } from '@/hooks/useBuildings';
 import { useLedger, useCollectPayment, useCreatePayment, useDeletePayment, useSharePayment, PaymentResponse, PaymentStatus } from '@/hooks/usePayments';
 import { useContracts } from '@/hooks/useContracts';
 import { useRooms } from '@/hooks/useRooms';
 import { useModal } from '@/app/context/ModalContext';
+import { UtilitySplitModal } from './components/UtilitySplitModal';
+import { ExpenseLedger } from './components/ExpenseLedger';
 
 const STATUS_BADGE: Record<PaymentStatus, React.ReactNode> = {
     PAID: <span className="bg-green-100 text-green-700 px-2.5 py-0.5 rounded-full text-xs font-bold">✅ 완납</span>,
@@ -19,7 +22,9 @@ function CollectModal({
 }: {
     payment: PaymentResponse; buildingId: number; year: number; month: number; onClose: () => void;
 }) {
-    const [paidAmount, setPaidAmount] = useState(payment.billedAmount - payment.paidAmount);
+    const initialRaw = payment.billedAmount - payment.paidAmount;
+    const [paidAmount, setPaidAmount] = useState(initialRaw);
+    const [displayAmount, setDisplayAmount] = useState(initialRaw > 0 ? initialRaw.toLocaleString('ko-KR') : '');
     const [method, setMethod] = useState('계좌이체');
     const [memo, setMemo] = useState('');
     const { mutate: collect, isPending } = useCollectPayment(buildingId, year, month);
@@ -50,7 +55,12 @@ function CollectModal({
                     </div>
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-1">납부 금액 (원)</label>
-                        <input type="number" min={1} value={paidAmount} onChange={e => setPaidAmount(Number(e.target.value))}
+                        <input type="text" inputMode="numeric" value={displayAmount}
+                            onChange={e => {
+                                const formatted = formatMoneyInput(e.target.value);
+                                setDisplayAmount(formatted);
+                                setPaidAmount(parseMoneyInput(formatted));
+                            }}
                             className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                     </div>
                     <div>
@@ -167,6 +177,8 @@ export default function LedgerPage() {
     const [showUnpaidOnly, setShowUnpaidOnly] = useState(false);
     const [collectTarget, setCollectTarget] = useState<PaymentResponse | null>(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isUtilityModalOpen, setIsUtilityModalOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<'REVENUE' | 'EXPENSE'>('REVENUE');
 
     const { data: buildings = [] } = useBuildings();
     const activeBuildingId = selectedBuildingId ?? buildings[0]?.id ?? null;
@@ -255,7 +267,17 @@ export default function LedgerPage() {
                 </div>
             </div>
 
-            {/* 필터 */}
+            {/* 탭 버튼 */}
+            {activeBuildingId && (
+                <div className="flex bg-white rounded-2xl shadow-sm border border-slate-200 p-1">
+                    <button onClick={() => setActiveTab('REVENUE')} className={`flex-1 py-3 text-sm font-extrabold rounded-xl transition-all ${activeTab === 'REVENUE' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:bg-slate-50'}`}>납부 내역 (수입)</button>
+                    <button onClick={() => setActiveTab('EXPENSE')} className={`flex-1 py-3 text-sm font-extrabold rounded-xl transition-all ${activeTab === 'EXPENSE' ? 'bg-red-50 text-red-600 shadow-sm border border-red-100' : 'text-slate-500 hover:bg-slate-50'}`}>비용 관리 (지출)</button>
+                </div>
+            )}
+
+            {activeTab === 'REVENUE' ? (
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    {/* 필터 */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="flex items-center gap-2">
                     <div className="relative">
@@ -269,10 +291,16 @@ export default function LedgerPage() {
                     </button>
                 </div>
                 {activeBuildingId && (
-                    <button onClick={() => setIsCreateModalOpen(true)}
-                        className="px-4 py-2 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 shadow-sm whitespace-nowrap">
-                        + 수납 기록 추가
-                    </button>
+                    <div className="flex gap-2">
+                        <button onClick={() => setIsUtilityModalOpen(true)}
+                            className="px-4 py-2 bg-blue-100 text-blue-700 border border-blue-200 rounded-xl font-bold text-sm hover:bg-blue-200 shadow-sm whitespace-nowrap transition-colors">
+                            🧾 일괄 공과금 추가
+                        </button>
+                        <button onClick={() => setIsCreateModalOpen(true)}
+                            className="px-4 py-2 bg-slate-800 text-white rounded-xl font-bold text-sm hover:bg-slate-900 shadow-sm whitespace-nowrap transition-colors">
+                            + 수납 기록 추가
+                        </button>
+                    </div>
                 )}
             </div>
 
@@ -437,6 +465,10 @@ export default function LedgerPage() {
                     </table>
                 </div>
             )}
+            </div>
+            ) : (
+                activeBuildingId && <ExpenseLedger buildingId={activeBuildingId} year={year} month={month} />
+            )}
 
             {/* 수납 처리 모달 */}
             {collectTarget && activeBuildingId && (
@@ -456,6 +488,16 @@ export default function LedgerPage() {
                     initialYear={year}
                     initialMonth={month}
                     onClose={() => setIsCreateModalOpen(false)}
+                />
+            )}
+
+            {/* 변동 관리비 일괄 부과 모달 */}
+            {isUtilityModalOpen && activeBuildingId && (
+                <UtilitySplitModal
+                    buildingId={activeBuildingId}
+                    year={year}
+                    month={month}
+                    onClose={() => setIsUtilityModalOpen(false)}
                 />
             )}
         </div>

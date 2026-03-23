@@ -132,6 +132,25 @@ export function useSharePayment() {
     });
 }
 
+export interface SplitUtilityRequest {
+    buildingId: number;
+    year: number;
+    month: number;
+    type: string;
+    totalAmount: number;
+}
+
+export function useSplitUtilityBill(buildingId: number, year: number, month: number) {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (req: SplitUtilityRequest) => api.post('/utilities/split', req),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['ledger', buildingId, year, month] });
+            queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
+        },
+    });
+}
+
 export interface MonthlyRevenueItem {
     year: number;
     month: number;

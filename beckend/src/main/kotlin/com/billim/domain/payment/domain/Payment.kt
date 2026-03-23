@@ -28,6 +28,9 @@ class Payment(
     @Column(name = "paid_amount", nullable = false)
     var paidAmount: Long = 0,
 
+    @Column(name = "utility_amount", nullable = false)
+    var utilityAmount: Long = 0,
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var status: PaymentStatus = PaymentStatus.UNPAID,
@@ -55,13 +58,22 @@ class Payment(
         }
     }
 
+    fun addUtilityCharge(amount: Long) {
+        this.utilityAmount += amount
+        this.status = when {
+            this.paidAmount >= (this.billedAmount + this.utilityAmount) -> PaymentStatus.PAID
+            this.paidAmount > 0 -> PaymentStatus.PARTIAL
+            else -> PaymentStatus.UNPAID
+        }
+    }
+
     fun collect(paidAmount: Long, paymentMethod: String?, memo: String?) {
         this.paidAmount = paidAmount
         this.paymentDate = LocalDate.now()
         this.paymentMethod = paymentMethod
         this.memo = memo
         this.status = when {
-            paidAmount >= this.billedAmount -> PaymentStatus.PAID
+            paidAmount >= (this.billedAmount + this.utilityAmount) -> PaymentStatus.PAID
             paidAmount > 0 -> PaymentStatus.PARTIAL
             else -> PaymentStatus.UNPAID
         }

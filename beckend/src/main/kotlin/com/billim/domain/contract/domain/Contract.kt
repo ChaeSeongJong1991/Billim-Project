@@ -83,6 +83,10 @@ class Contract(
         this.renewalStatus = RenewalStatus.RENEWED
     }
 
+    fun markAsExpired() {
+        this.renewalStatus = RenewalStatus.EXPIRED
+    }
+
     fun terminate() {
         this.renewalStatus = RenewalStatus.TERMINATED
     }

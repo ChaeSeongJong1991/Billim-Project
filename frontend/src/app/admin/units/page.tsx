@@ -5,6 +5,7 @@ import { useBuildings, useCreateBuilding, useDeleteBuilding, BuildingType } from
 import { useRooms, useCreateRoom, useUpdateRoomStatus, useDeleteRoom, PropertyType, RoomStatus, Room } from '@/hooks/useRooms';
 import { useCreateContract, useContractByRoom, useUpdateContract, ContractType, ContractResponse, ContractUpdateRequest } from '@/hooks/useContracts';
 import { useModal } from '@/app/context/ModalContext';
+import { formatMoneyInput, parseMoneyInput } from '@/lib/utils';
 
 const BUILDING_TYPE_LABELS: Record<BuildingType, string> = {
     APARTMENT: '아파트', VILLA: '빌라', OFFICE: '오피스텔', SHOP: '상가', ETC: '기타'
@@ -225,20 +226,20 @@ function ContractFormFields({
             <div className="grid grid-cols-2 gap-3">
                 <div>
                     <label className={labelCls}>보증금 (원) *</label>
-                    <input type="number" placeholder="예: 10000000" value={form.deposit} min={0}
-                        onChange={e => onChange({ deposit: e.target.value })} className={inputCls} />
+                    <input type="text" inputMode="numeric" placeholder="예: 10,000,000" value={form.deposit}
+                        onChange={e => onChange({ deposit: formatMoneyInput(e.target.value) })} className={inputCls} />
                 </div>
                 {!isJeonse && (
                     <div>
                         <label className={labelCls}>월세 (원) *</label>
-                        <input type="number" placeholder="예: 500000" value={form.monthlyRent} min={0}
-                            onChange={e => onChange({ monthlyRent: e.target.value })} className={inputCls} />
+                        <input type="text" inputMode="numeric" placeholder="예: 500,000" value={form.monthlyRent}
+                            onChange={e => onChange({ monthlyRent: formatMoneyInput(e.target.value) })} className={inputCls} />
                     </div>
                 )}
                 <div>
                     <label className={labelCls}>관리비 (원)</label>
-                    <input type="number" placeholder="예: 50000" value={form.maintenanceFee} min={0}
-                        onChange={e => onChange({ maintenanceFee: e.target.value })} className={inputCls} />
+                    <input type="text" inputMode="numeric" placeholder="예: 50,000" value={form.maintenanceFee}
+                        onChange={e => onChange({ maintenanceFee: formatMoneyInput(e.target.value) })} className={inputCls} />
                 </div>
                 {!isJeonse && (
                     <div>
@@ -318,9 +319,9 @@ function ContractModal({ room, buildingId, onClose }: { room: Room; buildingId: 
             contractType: form.contractType,
             tenantName: form.tenantName,
             tenantPhone: form.tenantPhone,
-            deposit: Number(form.deposit),
-            monthlyRent: form.contractType === 'JEONSE' ? 0 : Number(form.monthlyRent),
-            maintenanceFee: Number(form.maintenanceFee) || 0,
+            deposit: parseMoneyInput(form.deposit),
+            monthlyRent: form.contractType === 'JEONSE' ? 0 : parseMoneyInput(form.monthlyRent),
+            maintenanceFee: parseMoneyInput(form.maintenanceFee),
             rentDay: form.contractType === 'JEONSE' ? 1 : form.rentDay,
             startDate: form.startDate,
             endDate: form.endDate,
@@ -370,9 +371,9 @@ function initFormFromContract(contract: ContractResponse): ContractFormState {
         contractType: contract.contractType,
         tenantName: contract.tenantName,
         tenantPhone: contract.tenantPhone,
-        deposit: String(contract.deposit),
-        monthlyRent: String(contract.monthlyRent),
-        maintenanceFee: String(contract.maintenanceFee),
+        deposit: formatMoneyInput(contract.deposit),
+        monthlyRent: formatMoneyInput(contract.monthlyRent),
+        maintenanceFee: formatMoneyInput(contract.maintenanceFee),
         rentDay: contract.rentDay,
         startDate: contract.startDate,
         endDate: contract.endDate,
@@ -404,9 +405,9 @@ function ContractDetailModal({ room, buildingId, onClose }: { room: Room; buildi
             contractType: form.contractType,
             tenantName: form.tenantName,
             tenantPhone: form.tenantPhone,
-            deposit: Number(form.deposit),
-            monthlyRent: form.contractType === 'JEONSE' ? 0 : Number(form.monthlyRent),
-            maintenanceFee: Number(form.maintenanceFee) || 0,
+            deposit: parseMoneyInput(form.deposit),
+            monthlyRent: form.contractType === 'JEONSE' ? 0 : parseMoneyInput(form.monthlyRent),
+            maintenanceFee: parseMoneyInput(form.maintenanceFee),
             rentDay: form.contractType === 'JEONSE' ? 1 : form.rentDay,
             startDate: form.startDate,
             endDate: form.endDate,

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/lib/axios";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useModal } from "@/app/context/ModalContext";
 
-export default function NaverCallbackPage() {
+function NaverCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const login = useAuthStore((state) => state.login);
@@ -54,5 +54,13 @@ export default function NaverCallbackPage() {
     <div className="min-h-screen flex items-center justify-center">
       <p className="text-gray-500">네이버 로그인 처리 중...</p>
     </div>
+  );
+}
+
+export default function NaverCallbackPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><p>로딩중...</p></div>}>
+      <NaverCallbackContent />
+    </Suspense>
   );
 }

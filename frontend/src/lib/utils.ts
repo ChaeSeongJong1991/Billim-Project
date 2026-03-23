@@ -41,3 +41,13 @@ export function getInitials(name: string): string {
 export function generateId(): string {
   return Math.random().toString(36).substring(2, 11)
 }
+
+export function formatMoneyInput(value: string | number): string {
+  const digits = String(value).replace(/[^0-9]/g, '');
+  if (!digits) return '';
+  return parseInt(digits, 10).toLocaleString('ko-KR');
+}
+
+export function parseMoneyInput(formatted: string): number {
+  return parseInt(formatted.replace(/[^0-9]/g, ''), 10) || 0;
+}

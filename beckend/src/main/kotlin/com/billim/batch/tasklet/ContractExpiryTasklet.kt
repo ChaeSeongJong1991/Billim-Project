@@ -1,5 +1,7 @@
 package com.billim.batch.tasklet
 
+import com.billim.domain.building.domain.RoomStatus
+import com.billim.domain.building.infra.RoomRepository
 import com.billim.domain.contract.domain.Contract
 import com.billim.domain.contract.domain.RenewalStatus
 import com.billim.domain.contract.infra.ContractRepository
@@ -21,7 +23,8 @@ import java.time.temporal.ChronoUnit
  */
 @Component
 class ContractExpiryTasklet(
-    private val contractRepository: ContractRepository
+    private val contractRepository: ContractRepository,
+    private val roomRepository: RoomRepository
 ) : Tasklet {
 
     private val log = LoggerFactory.getLogger(ContractExpiryTasklet::class.java)
@@ -34,29 +37,34 @@ class ContractExpiryTasklet(
         val today = LocalDate.now()
         val limitDate = today.plusDays(EXPIRY_ALERT_DAYS)
 
-        log.info("[ContractExpiry] START - 만료 임박 계약 확인 (기준일: $today ~ $limitDate)")
+        log.info("[ContractExpiry] START (기준일: $today)")
 
+        // 1. 이미 만료된 계약 → EXPIRED 처리 + 호실 VACANT
+        val expiredContracts = contractRepository.findExpiredContracts(today, RenewalStatus.ACTIVE)
+        if (expiredContracts.isNotEmpty()) {
+            log.info("[ContractExpiry] 만료 계약 처리: ${expiredContracts.size}건")
+            expiredContracts.forEach { contract ->
+                contract.markAsExpired()
+                roomRepository.findByBuildingIdAndRoomNumber(contract.building.id!!, contract.roomNumber)
+                    ?.updateStatus(RoomStatus.VACANT)
+                log.info("[ContractExpiry] 만료 처리: buildingId=${contract.building.id}, roomNumber=${contract.roomNumber}, tenantName=${contract.tenantName}")
+            }
+            contribution.incrementWriteCount(expiredContracts.size.toLong())
+        }
+
+        // 2. 만료 임박 계약 → 알림 로그
         val expiringContracts = contractRepository.findExpiringContracts(today, limitDate, RenewalStatus.ACTIVE)
-
-        if (expiringContracts.isEmpty()) {
-            log.info("[ContractExpiry] 만료 임박 계약 없음")
-            return RepeatStatus.FINISHED
+        if (expiringContracts.isNotEmpty()) {
+            log.info("[ContractExpiry] 만료 임박 계약 ${expiringContracts.size}건 발견")
+            expiringContracts.forEach { contract ->
+                val daysLeft = ChronoUnit.DAYS.between(today, contract.endDate)
+                logExpiryAlert(contract, daysLeft)
+                // TODO: FCM Push 알림 발송 (세입자 앱 개발 후 연동)
+            }
+            repeat(expiringContracts.size) { contribution.incrementReadCount() }
         }
 
-        log.info("[ContractExpiry] 만료 임박 계약 ${expiringContracts.size}건 발견")
-
-        expiringContracts.forEach { contract ->
-            val daysLeft = ChronoUnit.DAYS.between(today, contract.endDate)
-            logExpiryAlert(contract, daysLeft)
-
-            // TODO: FCM Push 알림 발송 (세입자 앱 개발 후 연동)
-            // if (contract.tenantUserId != null) {
-            //     fcmService.sendExpiryNotification(contract.tenantUserId, daysLeft)
-            // }
-        }
-
-        repeat(expiringContracts.size) { contribution.incrementReadCount() }
-        log.info("[ContractExpiry] DONE")
+        log.info("[ContractExpiry] DONE (만료처리: ${expiredContracts.size}건, 알림: ${expiringContracts.size}건)")
 
         return RepeatStatus.FINISHED
     }

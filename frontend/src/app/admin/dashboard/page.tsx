@@ -4,7 +4,10 @@ import React, { useMemo } from 'react';
 import { useBuildings } from '@/hooks/useBuildings';
 import { useRooms } from '@/hooks/useRooms';
 import { useDashboardSummary } from '@/hooks/usePayments';
+import { useLandlordDashboard } from '@/hooks/useDashboard';
 import { useAuthStore } from '@/store/useAuthStore';
+import DashboardCalendar from './components/DashboardCalendar';
+import { ProfitabilityChart } from './components/ProfitabilityChart';
 
 function RoomStats({ buildingId }: { buildingId: number }) {
     const { data: rooms = [], isLoading } = useRooms(buildingId);
@@ -40,6 +43,7 @@ function RoomStats({ buildingId }: { buildingId: number }) {
 export default function DashboardPage() {
     const { data: buildings = [], isLoading: isBuildingsLoading } = useBuildings();
     const { data: summary } = useDashboardSummary();
+    const { data: landlordDashboard } = useLandlordDashboard();
     const user = useAuthStore((state) => state.user);
     const today = new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
 
@@ -100,12 +104,32 @@ export default function DashboardPage() {
                 </a>
 
                 {/* 계약 만료 */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                <div className={`bg-white p-6 rounded-2xl shadow-sm border ${landlordDashboard && landlordDashboard.expiringContractCount > 0 ? 'border-l-4 border-orange-400' : 'border-slate-100'}`}>
                     <div className="text-slate-500 text-sm font-medium mb-1">계약 만료 (30일 내)</div>
-                    <div className="text-3xl font-bold text-slate-300">-</div>
-                    <div className="text-xs text-slate-400 mt-2">계약 알림 기능 개발 후 연동 예정</div>
+                    {landlordDashboard ? (
+                        <>
+                            <div className={`text-3xl font-bold ${landlordDashboard.expiringContractCount > 0 ? 'text-orange-500' : 'text-green-500'}`}>
+                                {landlordDashboard.expiringContractCount}건
+                            </div>
+                            <div className="text-xs text-slate-400 mt-2">
+                                {landlordDashboard.expiringContractCount > 0
+                                    ? `⚠️ ${landlordDashboard.expiringContractCount}건 만료 예정`
+                                    : '✅ 만료 예정 없음'}
+                            </div>
+                        </>
+                    ) : (
+                        <div className="animate-pulse h-9 w-16 bg-slate-100 rounded mt-1" />
+                    )}
                 </div>
             </div>
+
+            {/* 수익률 분석 차트 */}
+            <div className="w-full">
+                <ProfitabilityChart year={new Date().getFullYear()} />
+            </div>
+
+            {/* 월별 납부 캘린더 */}
+            <DashboardCalendar />
 
             {/* 내 건물 목록 */}
             <div className="space-y-4">
