@@ -31,6 +31,8 @@ spring:
       enabled: false # 개발 환경에서 Job 자동 실행 비활성화
 
 jwt:
+  # WARNING: The default secret is for local development ONLY.
+  # In production, you MUST set the JWT_SECRET environment variable to a unique, strong secret.
   secret: ${JWT_SECRET:billim-local-dev-secret-key-must-be-at-least-32-chars-long}
   access-token-validity: 3600000 # 1시간
   refresh-token-validity: 1209600000 # 14일

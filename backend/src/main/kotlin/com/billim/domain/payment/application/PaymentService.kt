@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.temporal.ChronoUnit
 
 @Service
@@ -87,7 +89,7 @@ class PaymentService(
             throw IllegalStateException("본인 소유 건물의 수납만 처리할 수 있습니다.")
         }
 
-        payment.collect(request.paidAmount, request.paymentMethod, request.memo)
+        payment.collect(request.paidAmount, request.paymentMethod, request.memo, LocalDate.now())
     }
 
     // 수납 기록 삭제
@@ -191,6 +193,10 @@ class PaymentService(
         val payment = paymentRepository.findByShareToken(token)
             ?: throw EntityNotFoundException(0, "유효하지 않은 공유 링크입니다.")
 
+        if (payment.shareTokenExpiry != null && LocalDateTime.now().isAfter(payment.shareTokenExpiry)) {
+            throw IllegalArgumentException("공유 링크가 만료되었습니다.")
+        }
+
         return PublicPaymentResponse(
             id = payment.id!!,
             buildingName = payment.contract.building.name,
@@ -209,7 +215,7 @@ class PaymentService(
     private fun Payment.toResponse(): PaymentResponse {
         val today = LocalDate.now()
         val rentDay = this.contract.rentDay
-        val dueDate = LocalDate.of(this.billingYear, this.billingMonth, minOf(rentDay, today.month.length(today.isLeapYear)))
+        val dueDate = LocalDate.of(this.billingYear, this.billingMonth, minOf(rentDay, YearMonth.of(this.billingYear, this.billingMonth).lengthOfMonth()))
         val overdueDays = if (this.status != PaymentStatus.PAID && today.isAfter(dueDate)) {
             ChronoUnit.DAYS.between(dueDate, today).toInt()
         } else null

@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.env.Environment
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -17,10 +18,34 @@ import javax.crypto.SecretKey
 @Component
 class JwtTokenProvider(
     @Value("\${jwt.secret}") private val secretKey: String,
-    @Value("\${jwt.access-token-validity}") private val validityInMilliseconds: Long
+    @Value("\${jwt.access-token-validity}") private val validityInMilliseconds: Long,
+    private val environment: Environment
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
+
+    companion object {
+        private const val DEFAULT_DEV_SECRET = "billim-local-dev-secret-key-must-be-at-least-32-chars-long"
+    }
+
+    init {
+        if (secretKey.isBlank()) {
+            throw IllegalStateException("JWT secret must not be blank. Set the JWT_SECRET environment variable.")
+        }
+
+        val activeProfiles = environment.activeProfiles.toSet()
+        val isProduction = activeProfiles.contains("prod") || activeProfiles.contains("production")
+
+        if (secretKey == DEFAULT_DEV_SECRET) {
+            if (isProduction) {
+                throw IllegalStateException(
+                    "Default JWT secret must not be used in production. Set a unique JWT_SECRET environment variable."
+                )
+            } else {
+                logger.warn("Using default JWT secret. This is acceptable for local development only. Set JWT_SECRET for other environments.")
+            }
+        }
+    }
 
     private val key: SecretKey by lazy {
         Keys.hmacShaKeyFor(secretKey.toByteArray(Charsets.UTF_8))

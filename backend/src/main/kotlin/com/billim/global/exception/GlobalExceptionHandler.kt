@@ -137,7 +137,7 @@ class GlobalExceptionHandler {
         val errorData = mapOf(
             "timestamp" to LocalDateTime.now(),
             "path" to request.getDescription(false).replace("uri=", ""),
-            "error" to (e.javaClass.simpleName)
+            "error" to "InternalError"
         )
 
         return ResponseEntity(
