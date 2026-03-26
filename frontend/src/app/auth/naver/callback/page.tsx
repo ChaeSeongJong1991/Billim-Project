@@ -2,7 +2,7 @@
 
 import { useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import api from "@/lib/axios";
+import publicApi from "@/lib/axiosPublic";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useModal } from "@/app/context/ModalContext";
 
@@ -28,7 +28,7 @@ function NaverCallbackContent() {
 
     const handleNaverCallback = async () => {
       try {
-        const response = await api.post<{ accessToken: string }>("/auth/social/naver", {
+        const response = await publicApi.post<{ accessToken: string }>("/auth/social/naver", {
           code,
           state,
         });
