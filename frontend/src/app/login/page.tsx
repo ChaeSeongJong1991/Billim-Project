@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { RiKakaoTalkFill, RiGoogleFill } from "react-icons/ri";
 import { SiNaver } from "react-icons/si";
-import api from "@/lib/axios";
+import publicApi from "@/lib/axiosPublic";
 import { auth, googleProvider } from "@/lib/firebase";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useModal } from "@/app/context/ModalContext";
@@ -38,7 +38,7 @@ export default function LoginPage() {
     userName: string,
     userEmail: string
   ) => {
-    const response = await api.post<{ accessToken: string; tokenType: string }>(
+    const response = await publicApi.post<{ accessToken: string; tokenType: string }>(
       "/auth/social",
       { idToken, provider }
     );
