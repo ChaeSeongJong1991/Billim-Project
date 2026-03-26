@@ -56,6 +56,17 @@ interface PaymentRepository : JpaRepository<Payment, Long> {
     """)
     fun sumUnpaidAmountByUserEmail(email: String): Long
 
+    // 대시보드용: 미납 건수 + 미납 총액을 단일 쿼리로 조회
+    @Query("""
+        SELECT COUNT(p), COALESCE(SUM(p.billedAmount + p.utilityAmount - p.paidAmount), 0)
+        FROM Payment p
+        JOIN p.contract c
+        JOIN c.building b
+        WHERE b.user.email = :email
+          AND p.status IN ('UNPAID', 'PARTIAL')
+    """)
+    fun countAndSumUnpaidByUserEmail(email: String): Array<Long>
+
     // 공유 토큰으로 납부 조회 (공개 청구서)
     fun findByShareToken(shareToken: String): Payment?
 

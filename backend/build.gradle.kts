@@ -48,6 +48,7 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("com.h2database:h2")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
 }
 
 // VS Code 플러그인을 위한 강제 버전 주입

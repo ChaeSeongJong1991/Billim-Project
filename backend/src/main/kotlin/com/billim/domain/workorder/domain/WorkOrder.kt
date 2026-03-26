@@ -1,5 +1,8 @@
 package com.billim.domain.workorder.domain
 
+import com.billim.domain.building.domain.Building
+import com.billim.domain.building.domain.Room
+import com.billim.domain.tenant.domain.Tenant
 import com.billim.global.common.BaseEntity
 import jakarta.persistence.*
 import jakarta.validation.constraints.NotBlank
@@ -45,17 +48,17 @@ import java.time.LocalDateTime
     ]
 )
 class WorkOrder(
-    @field:NotNull(message = "임차인 ID는 필수입니다.")
-    @Column(nullable = false)
-    var tenantId: Long,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tenant_id", nullable = false)
+    var tenant: Tenant,
 
-    @field:NotNull(message = "건물 ID는 필수입니다.")
-    @Column(nullable = false)
-    var buildingId: Long,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "building_id", nullable = false)
+    var building: Building,
 
-    @field:NotNull(message = "호실 ID는 필수입니다.")
-    @Column(nullable = false)
-    var unitId: Long,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "unit_id", nullable = false)
+    var unit: Room,
 
     @field:NotBlank(message = "제목은 필수입니다.")
     @Column(nullable = false, length = 255)

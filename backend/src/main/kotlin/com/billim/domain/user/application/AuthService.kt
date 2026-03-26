@@ -69,7 +69,7 @@ class AuthService(
         }
 
         // Fallback: Google tokeninfo API (serviceAccountKey.json 없는 환경)
-        logger.warn("Firebase Admin 미초기화 — Google tokeninfo API로 fallback 검증")
+        logger.error("Firebase Admin 미초기화 — Google tokeninfo API로 fallback 검증")
         val response = try {
             restTemplate.getForObject(
                 "https://oauth2.googleapis.com/tokeninfo?id_token=$idToken",

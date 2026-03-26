@@ -2,11 +2,17 @@ package com.billim.domain.contract.infra
 
 import com.billim.domain.contract.domain.Contract
 import com.billim.domain.contract.domain.RenewalStatus
+import jakarta.persistence.LockModeType
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
 import java.time.LocalDate
 
 interface ContractRepository : JpaRepository<Contract, Long> {
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT c FROM Contract c WHERE c.id = :id")
+    fun findByIdWithLock(id: Long): Contract?
 
     fun findAllByBuildingId(buildingId: Long): List<Contract>
 

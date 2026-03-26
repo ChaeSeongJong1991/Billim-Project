@@ -4,6 +4,7 @@ import com.billim.domain.contract.domain.Contract
 import com.billim.global.common.BaseEntity
 import jakarta.persistence.*
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Entity
 @Table(
@@ -47,6 +48,12 @@ class Payment(
     @Column(name = "share_token", unique = true, nullable = true, length = 36)
     var shareToken: String? = null,
 
+    @Column(name = "share_token_expiry")
+    var shareTokenExpiry: LocalDateTime? = null,
+
+    @Version
+    var version: Long = 0,
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null
@@ -56,6 +63,7 @@ class Payment(
         if (this.shareToken == null) {
             this.shareToken = java.util.UUID.randomUUID().toString()
         }
+        this.shareTokenExpiry = LocalDateTime.now().plusDays(30)
     }
 
     fun addUtilityCharge(amount: Long) {
@@ -67,9 +75,9 @@ class Payment(
         }
     }
 
-    fun collect(paidAmount: Long, paymentMethod: String?, memo: String?) {
+    fun collect(paidAmount: Long, paymentMethod: String?, memo: String?, paymentDate: LocalDate) {
         this.paidAmount = paidAmount
-        this.paymentDate = LocalDate.now()
+        this.paymentDate = paymentDate
         this.paymentMethod = paymentMethod
         this.memo = memo
         this.status = when {

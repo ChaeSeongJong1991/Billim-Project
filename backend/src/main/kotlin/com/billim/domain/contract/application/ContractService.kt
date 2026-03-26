@@ -124,8 +124,8 @@ class ContractService(
     fun renew(email: String, contractId: Long, request: ContractRenewRequest): Long {
         val user = userRepository.findByEmail(email)
             ?: throw IllegalArgumentException("사용자를 찾을 수 없습니다.")
-        val oldContract = contractRepository.findById(contractId)
-            .orElseThrow { EntityNotFoundException(contractId, "계약을 찾을 수 없습니다.") }
+        val oldContract = contractRepository.findByIdWithLock(contractId)
+            ?: throw EntityNotFoundException(contractId, "계약을 찾을 수 없습니다.")
         if (oldContract.building.user.id != user.id) {
             throw IllegalStateException("본인 소유 건물의 계약만 갱신할 수 있습니다.")
         }
@@ -170,8 +170,8 @@ class ContractService(
     fun terminate(email: String, contractId: Long) {
         val user = userRepository.findByEmail(email)
             ?: throw IllegalArgumentException("사용자를 찾을 수 없습니다.")
-        val contract = contractRepository.findById(contractId)
-            .orElseThrow { EntityNotFoundException(contractId, "계약을 찾을 수 없습니다.") }
+        val contract = contractRepository.findByIdWithLock(contractId)
+            ?: throw EntityNotFoundException(contractId, "계약을 찾을 수 없습니다.")
         if (contract.building.user.id != user.id) {
             throw IllegalStateException("본인 소유 건물의 계약만 종료할 수 있습니다.")
         }

@@ -1,6 +1,5 @@
 package com.billim.domain.dashboard.application
 
-import com.billim.domain.building.domain.RoomStatus
 import com.billim.domain.building.infra.BuildingRepository
 import com.billim.domain.building.infra.RoomRepository
 import com.billim.domain.contract.domain.RenewalStatus
@@ -37,16 +36,18 @@ class LandlordDashboardService(
         val today = LocalDate.now()
         val limitDate = today.plusDays(30)
 
-        val totalRooms = roomRepository.countByBuildingIdIn(buildingIds)
-        val occupiedRooms = roomRepository.countByBuildingIdInAndStatus(buildingIds, RoomStatus.OCCUPIED)
+        val roomCounts = roomRepository.countTotalAndOccupiedByBuildingIdIn(buildingIds)
+        val totalRooms = roomCounts[0]
+        val occupiedRooms = roomCounts[1]
         val occupancyRate = if (totalRooms > 0) ((occupiedRooms.toDouble() / totalRooms) * 100).toInt() else 0
 
         val expiringContractCount = contractRepository.countExpiringByUserEmail(
             email, today, limitDate, RenewalStatus.ACTIVE
         )
 
-        val unpaidCount = paymentRepository.countUnpaidByUserEmail(email)
-        val unpaidAmount = paymentRepository.sumUnpaidAmountByUserEmail(email)
+        val unpaidCounts = paymentRepository.countAndSumUnpaidByUserEmail(email)
+        val unpaidCount = unpaidCounts[0]
+        val unpaidAmount = unpaidCounts[1]
 
         return LandlordDashboardResponse(
             expiringContractCount = expiringContractCount,

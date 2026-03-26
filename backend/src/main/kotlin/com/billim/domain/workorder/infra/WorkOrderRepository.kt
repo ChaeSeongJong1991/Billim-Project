@@ -1,5 +1,8 @@
 package com.billim.domain.workorder.infra
 
+import com.billim.domain.building.domain.Building
+import com.billim.domain.building.domain.Room
+import com.billim.domain.tenant.domain.Tenant
 import com.billim.domain.workorder.domain.WorkOrder
 import com.billim.domain.workorder.domain.WorkOrderStatus
 import org.springframework.data.jpa.repository.JpaRepository
@@ -13,17 +16,17 @@ interface WorkOrderRepository : JpaRepository<WorkOrder, Long> {
     /**
      * 임차인의 모든 WorkOrder 조회 (soft delete 제외)
      */
-    fun findAllByTenantIdAndDeletedAtIsNull(tenantId: Long): List<WorkOrder>
+    fun findAllByTenantAndDeletedAtIsNull(tenant: Tenant): List<WorkOrder>
 
     /**
      * 건물의 모든 WorkOrder 조회 (soft delete 제외)
      */
-    fun findAllByBuildingIdAndDeletedAtIsNull(buildingId: Long): List<WorkOrder>
+    fun findAllByBuildingAndDeletedAtIsNull(building: Building): List<WorkOrder>
 
     /**
      * 호실의 모든 WorkOrder 조회 (soft delete 제외)
      */
-    fun findAllByUnitIdAndDeletedAtIsNull(unitId: Long): List<WorkOrder>
+    fun findAllByUnitAndDeletedAtIsNull(unit: Room): List<WorkOrder>
 
     /**
      * 특정 상태의 WorkOrder 조회 (soft delete 제외)
@@ -38,12 +41,12 @@ interface WorkOrderRepository : JpaRepository<WorkOrder, Long> {
     /**
      * 임차인 + 상태로 WorkOrder 조회 (soft delete 제외)
      */
-    fun findAllByTenantIdAndStatusAndDeletedAtIsNull(tenantId: Long, status: WorkOrderStatus): List<WorkOrder>
+    fun findAllByTenantAndStatusAndDeletedAtIsNull(tenant: Tenant, status: WorkOrderStatus): List<WorkOrder>
 
     /**
      * 건물 + 상태로 WorkOrder 조회 (soft delete 제외)
      */
-    fun findAllByBuildingIdAndStatusAndDeletedAtIsNull(buildingId: Long, status: WorkOrderStatus): List<WorkOrder>
+    fun findAllByBuildingAndStatusAndDeletedAtIsNull(building: Building, status: WorkOrderStatus): List<WorkOrder>
 
     /**
      * 할당되지 않은 WorkOrder 조회

@@ -35,6 +35,15 @@ class SecurityConfig(
             .formLogin { it.disable() }
             .httpBasic { it.disable() }
             
+            .headers { headers ->
+                headers.frameOptions { it.deny() }
+                headers.contentTypeOptions { }
+                headers.httpStrictTransportSecurity { hsts ->
+                    hsts.includeSubDomains(true)
+                    hsts.maxAgeInSeconds(31536000)
+                }
+            }
+
             // [NEW] 에러 핸들링 추가
             .exceptionHandling {
                 it.authenticationEntryPoint(jwtAuthenticationEntryPoint)
@@ -66,7 +75,7 @@ class SecurityConfig(
         val configuration = CorsConfiguration()
         configuration.allowedOrigins = listOf("http://localhost:3000") // Next.js port
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-        configuration.allowedHeaders = listOf("*")
+        configuration.allowedHeaders = listOf("Authorization", "Content-Type", "Accept", "X-Requested-With")
         configuration.allowCredentials = true
         
         val source = UrlBasedCorsConfigurationSource()
