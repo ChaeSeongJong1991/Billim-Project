@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // 인증 없이 사용하는 공개 API용 axios 인스턴스
 const publicApi = axios.create({
-    baseURL: 'http://localhost:8080/api/v1',
+    baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1',
     headers: {
         'Content-Type': 'application/json',
     },
