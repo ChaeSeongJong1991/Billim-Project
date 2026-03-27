@@ -1,8 +1,6 @@
 // app/layout.tsx
 import './globals.css';
 import Providers from './providers';
-import KakaoInit from '@/components/KakaoInit';
-
 import type { Metadata } from "next";
 import { Noto_Sans_KR } from "next/font/google";
 
@@ -24,7 +22,6 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <body className={notoSansKr.className}>
-        <KakaoInit />
         <Providers>
           {children}
         </Providers>
