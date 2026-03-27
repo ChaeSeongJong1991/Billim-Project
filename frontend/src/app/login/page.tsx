@@ -5,8 +5,7 @@ import { useRouter } from "next/navigation";
 import { signInWithPopup } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { RiKakaoTalkFill, RiGoogleFill } from "react-icons/ri";
-import { SiNaver } from "react-icons/si";
+import { RiGoogleFill } from "react-icons/ri";
 import publicApi from "@/lib/axiosPublic";
 import { auth, googleProvider } from "@/lib/firebase";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -34,7 +33,7 @@ export default function LoginPage() {
 
   const callSocialLogin = async (
     idToken: string,
-    provider: "GOOGLE" | "KAKAO" | "NAVER",
+    provider: "GOOGLE",
     userName: string,
     userEmail: string
   ) => {
@@ -90,54 +89,6 @@ export default function LoginPage() {
     }
   };
 
-  // ── Kakao 로그인 ──────────────────────────────────────────────────────────
-
-  const handleKakaoLogin = async () => {
-    setLoadingProvider("kakao");
-    try {
-      const Kakao = window.Kakao;
-      if (!Kakao?.isInitialized?.()) {
-        showAlert({
-          title: "Kakao 초기화 오류",
-          message: "Kakao SDK가 로드되지 않았습니다. 잠시 후 다시 시도해주세요.",
-          variant: "DANGER",
-        });
-        return;
-      }
-
-      await new Promise<void>((resolve, reject) => {
-        Kakao.Auth.login({
-          success: async (authObj: { access_token: string }) => {
-            try {
-              await callSocialLogin(authObj.access_token, "KAKAO", "카카오 사용자", "");
-              resolve();
-            } catch (e) {
-              reject(e);
-            }
-          },
-          fail: reject,
-        });
-      });
-    } catch {
-      showAlert({
-        title: "Kakao 로그인 실패",
-        message: "카카오 로그인 중 오류가 발생했습니다.",
-        variant: "DANGER",
-      });
-    } finally {
-      setLoadingProvider(null);
-    }
-  };
-
-  // ── Naver 로그인 ──────────────────────────────────────────────────────────
-
-  const handleNaverLogin = () => {
-    const clientId = process.env.NEXT_PUBLIC_NAVER_CLIENT_ID;
-    const redirectUri = encodeURIComponent(`${window.location.origin}/auth/naver/callback`);
-    const state = Math.random().toString(36).substring(2);
-    window.location.href = `https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&state=${state}`;
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <Card className="w-full max-w-md shadow-lg">
@@ -151,28 +102,6 @@ export default function LoginPage() {
           <p className="text-center text-sm text-gray-500 pb-2">
             소셜 계정으로 간편하게 시작하세요
           </p>
-
-          {/* 카카오 */}
-          <Button
-            variant="outline"
-            className="w-full bg-[#FEE500] hover:bg-[#FEE500]/90 text-black border-none relative h-11"
-            onClick={handleKakaoLogin}
-            disabled={loadingProvider !== null}
-          >
-            <RiKakaoTalkFill className="absolute left-4 w-6 h-6" />
-            {loadingProvider === "kakao" ? "로그인 중..." : "카카오로 시작하기"}
-          </Button>
-
-          {/* 네이버 */}
-          <Button
-            variant="outline"
-            className="w-full bg-[#03C75A] hover:bg-[#03C75A]/90 text-white border-none relative h-11"
-            onClick={handleNaverLogin}
-            disabled={loadingProvider !== null}
-          >
-            <SiNaver className="absolute left-4 w-4 h-4" />
-            네이버로 시작하기
-          </Button>
 
           {/* 구글 */}
           <Button
